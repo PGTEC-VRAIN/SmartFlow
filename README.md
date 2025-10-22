@@ -31,9 +31,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/PGTEC-VRAIN/Entorno-AirFlow_IotAgent_OrionLD_QuantumLeap/blob/main/">
-    <img src="./images/logo_PGTEC.png" alt="Logo" width="80" height="80">
-  </a>
+  <a href="https://pgtec.webs.upv.es/images/logo_PGTEC.svg">  </a>
 
   <h3 align="center">Smart data pipelines</h3>
 
@@ -109,7 +107,7 @@ The project is built using the following main components:
 
   | <!-- -->                                   | <!-- -->             | <!-- -->            |
   |:-------------------------------------------:|:--------------------:|:-------------------:|
-  | [![Python][Python]][Python-url]             | [![Airflow][Airflow]][Airflow-url]   | [![Smart-data-models][Smart-data-models-url]][Docker-url] |
+  | [![Python][Python]][Python-url]             | [![Airflow][Airflow]][Airflow-url]   | [![Smart-data-models][Smart-data-models][Smart-data-models-url]] |
 
 
 </div>
