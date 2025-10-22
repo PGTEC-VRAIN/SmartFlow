@@ -4,7 +4,7 @@
 	"modelTags": "",
 	"$id": "https://raw.githubusercontent.com/PGTEC-VRAIN/SmartFlow/main/SmartDataModels/WeatherForcastSeries.json",
 	"title": " - Weather Forecast schema",
-	"description": "A harmonised description of a Weather Forecast Series.",
+	"description": "A harmonised description of a Weather Forecast time Series.",
 	"type": "object",
 	"allOf": [
 		{
@@ -18,9 +18,9 @@
 				"type": {
 					"type": "string",
 					"enum": [
-						"WeatherForecast"
+						"WeatherForecastSeries"
 					],
-					"description": "Property. NGSI Entity type. It has to be WeatherForecast."
+					"description": "Property. NGSI Entity type. It has to be WeatherForecastSeries."
 				},
 				"weatherType": {
 					"type": "string",
