@@ -31,7 +31,9 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://pgtec.webs.upv.es/images/logo_PGTEC.svg">  </a>
+  <a href="https://pgtec.webs.upv.es/">
+    <img src="https://pgtec.webs.upv.es/images/logo_PGTEC.svg" alt="PGTEC Logo" width="80"/>
+  </a>
 
   <h3 align="center">Smart data pipelines</h3>
 
@@ -107,7 +109,7 @@ The project is built using the following main components:
 
   | <!-- -->                                   | <!-- -->             | <!-- -->            |
   |:-------------------------------------------:|:--------------------:|:-------------------:|
-  | [![Python][Python]][Python-url]             | [![Airflow][Airflow]][Airflow-url]   | [![Smart-data-models][Smart-data-models][Smart-data-models-url]] |
+  | [![Python][Python]][Python-url]             | [![Airflow][Airflow]][Airflow-url]   | [![Smart-data-models][Smart-data-models][Smart-Data-models-url]] |
 
 
 </div>
