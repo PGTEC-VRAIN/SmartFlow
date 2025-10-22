@@ -109,7 +109,7 @@ The project is built using the following main components:
 
   | <!-- -->                                   | <!-- -->             | <!-- -->            |
   |:-------------------------------------------:|:--------------------:|:-------------------:|
-  | [![Python][Python]][Python-url]             | [![Airflow][Airflow]][Airflow-url]   | [![Smart-data-models][Smart-data-models][Smart-Data-models-url]] |
+  | [![Python][Python]][Python-url]             | [![Airflow][Airflow]][Airflow-url]   | [![Smart-data-models][Smart-data-models]][Smart-Data-models-url] |
 
 
 </div>
