@@ -237,5 +237,5 @@ Project Link: [https://github.com/PGTEC-VRAIN](https://github.com/PGTEC-VRAIN)
 [Python-url]: https://www.python.org/
 [Airflow]: https://img.shields.io/badge/airflow-2.x-darkblue.svg?logo=apacheairflow&logoColor=white
 [Airflow-url]: https://airflow.apache.org/
-[Smart-data-models]: https://www.google.com/imgres?q=smart%20data%20models&imgurl=https%3A%2F%2Fwww.fiware.org%2Fwp-content%2Fuploads%2FSmartDataModels_Logo.png&imgrefurl=https%3A%2F%2Fwww.fiware.org%2Fabout-us%2Fsmart-energy%2F&docid=GUmbMPNKKxBbIM&tbnid=L0LEE9L_sxKLvM&vet=12ahUKEwiB7t6S4beQAxWLa_EDHSBfIJoQM3oECFoQAA..i&w=600&h=170&hcb=2&ved=2ahUKEwiB7t6S4beQAxWLa_EDHSBfIJoQM3oECFoQAA
+[Smart-data-models]: https://img.shields.io/badge/smartdata-models-fiware
 [Smart-Data-models-url]: https://github.com/smart-data-models/dataModel.Weather
