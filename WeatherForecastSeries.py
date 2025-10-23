@@ -31,6 +31,7 @@ class WeatherForecastSeries:
         temperature: list[float] | None = None,
         feelsLikeTemperature: list[float] | None = None,
         relativeHumidity: list[float] | None = None, # Range [0, 1]
+        timestamp: list[datetime] | None = None, # Lista de fechas 
         dateRetrieved: datetime | None = None,
         validFrom: datetime | None = None,
         validTo: datetime | None = None,
@@ -64,6 +65,7 @@ class WeatherForecastSeries:
         self.temperature = temperature
         self.feelsLikeTemperature = feelsLikeTemperature
         self.relativeHumidity = relativeHumidity
+        self.timestamp = timestamp
         self.dateRetrieved = dateRetrieved
         self.validFrom = validFrom
         self.validTo = validTo
@@ -79,11 +81,11 @@ class WeatherForecastSeries:
         data = {}
         
         # Properties to exclude (private, derived, or explicitly requested for removal)
-        EXCLUDE_KEYS = ['_extra_attrs', 'dayMaximum', 'dayMinimum']
+        #EXCLUDE_KEYS = ['_extra_attrs', 'dayMaximum', 'dayMinimum']
         
         # Iterate over all attributes
         for key, value in self.__dict__.items():
-            if key.startswith('_') or key in EXCLUDE_KEYS or value is None:
+            if key.startswith('_')  or value is None: #or key in EXCLUDE_KEYS
                 continue
 
             # Handle datetime objects: convert to ISO 8601 string
