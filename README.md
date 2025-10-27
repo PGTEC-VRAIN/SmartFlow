@@ -96,7 +96,7 @@ This repository specifically contains the Python scripts used to:
 
 - Convert the raw data into FIWARE Smart Data Models to standardize the format.
 
-- Facilitate the training of machine learning models and the creation of automated Airflow DAGs for pipeline execution.
+- The creation of automated Airflow DAGs for pipeline execution.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -119,7 +119,67 @@ The project is built using the following main components:
 <!-- GETTING STARTED -->
 ### Getting Started 
 
-To fill...
+To get a local copy up and running follow these simple steps in ubuntu command line:
+
+1. Clone the repo and navigate to the project folder
+   ```sh
+   git clone https://github.com/PGTEC-VRAIN/SmartFlow
+   cd SmartFlow
+   ``` 
+
+2. Create a virtual environment
+   ```sh
+   python -m venv venv
+   source venv/bin/activate 
+   ```
+
+3. Install the required packages
+   ```sh
+   pip install -r requirements.txt
+   ```
+
+4. Initialize Airflow
+   ```sh
+   airflow standalone
+   ```
+
+Here is a brief explanation of the Python scripts:
+
+- `AEMET_HARMONIE_AROME.py`: This script retrieves weather forecast data from the AEMET website and processes it into a standardized format defined by the `WeatherForecastSeries.py` Smart Data Model.
+The input data are GeoTIFF (.tif) files containing weather variables encoded as color values.
+Using a color scale provided by AEMET, the script converts these color codes (RGBA) into real physical values such as temperature, wind speed, and precipitation.
+
+No API key is required for execution as we are downloading public data from AEMET website.
+Run this script hourly to ensure the latest forecasts are always retrieved and processed.
+
+- `ARPEGE-AROME.py`: This script retrieves weather forecast data for the model ARPEGE-AROME from the MeteoFrance website and processes it into a standardized format defined by the `WeatherForecastSeries.py` Smart Data Model.
+
+Data format xxxx
+API Key xxxx
+Run script xxxx
+ 
+- `Open-Meteo.py`: This script retrieves weather data from the Open-Meteo API and processes it into a standardized format using `WeatherForecastSeries.py` Smart Data Model. The input data are JSON files. Here are the weather models that we are currently using:
+
+- ICON-EU DWD (`dwd_icon_eu`)
+- ARPEGE MétéoFrance (`meteofrance_arpege_europe`)
+- HRES/IFS 9km Resolution ECMWF  (`ecmwf_ifs`)
+- GFS NOAA (`ncep_gfs013`o `ncep_gfs025`)
+- AIFS ECMWF (modelo de IA) (`ecmwf_aifs025`)
+- GEPS_ENS CMC (`cmc_gem_geps`)
+- SEAS5_ECMWF Copernicus (`ecmwf_seas5_6hourly`)
+
+No API key is required for execution.
+Run this script hourly to ensure the latest forecasts are always retrieved and processed.
+
+- `Copernicus.py`: This script retrieves weather forecast data from the Copernicus Climate Data Store (CDS) API and Early Warning Data Store (EWDS) and processes it into a standardized format defined by the `WeatherForecastSeries.py` Smart Data Model. The input data are NetCDF (.nc) files containing various weather variables. The weather models currently used are:
+
+- EFFIS (a través del EWDS de Copernicus, no hay tiempo real, Catalogue — CEMS Early Warning Data Store) 
+- EFAS (a través del EWDS de Copernicus, no hay tiempo real, Catalogue — CEMS Early Warning Data Store)
+
+An API key is required for execution. To get an API key, you need to register on the Copernicus Climate Data Store website: https://cds.climate.copernicus.eu
+
+Run this script daily to ensure the latest forecasts are always retrieved and processed.
+
 <!--
 ### Prerequisites
 
