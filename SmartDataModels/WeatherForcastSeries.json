@@ -22,36 +22,6 @@
           ],
           "description": "Property. NGSI Entity type. It has to be WeatherForecastSeries."
         },
-        "weatherType": {
-          "type": "string",
-          "description": "Property. Text description of the weather. Model:'http://schema.org/Text'."
-        },
-        "visibility": {
-          "description": "Property. Model:'http://schema.org/Text'. Categories of visibility.",
-          "anyOf": [
-            {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": [
-                  "veryPoor",
-                  "poor",
-                  "moderate",
-                  "good",
-                  "veryGood",
-                  "excellent"
-                ]
-              }
-            },
-            {
-              "type": "array",
-              "items": {
-                "type": "number",
-                "minimum": 0
-              }
-            }
-          ]
-        },
         "windDirection": {
           "type": "array",
           "items": {
@@ -150,36 +120,6 @@
             "format": "date-time"
           },
           "description": "Property. Model:'https://schema.org/Text'. ISO8601 UTC date and time of each of the predictions in the series."
-        },
-        "dayMaximum": {
-          "type": "object",
-          "description": "Property. Model:'https://schema.org/StructuredValue'. Maximum values for the reported period. Subattributes:- `temperature` : Maximum temperature. See `WeatherForecast.temperature` for description and units. - `feelLikesTemperature`. Maximum feels like temperature. Same semantics and units as `WeatherForecast.feelsLikeTemperature`.- `relativeHumidity`. Maximum relative humidity. Same semantics and units as `WeatherForecast.relativeHumidity`.",
-          "properties": {
-            "temperature": {
-              "$ref": "https://smart-data-models.github.io/dataModel.Weather/weather-schema.json#/definitions/Weather-AirConditions/properties/temperature."
-            },
-            "feelLikesTemperature": {
-              "$ref": "https://smart-data-models.github.io/dataModel.Weather/weather-schema.json#/definitions/Weather-AirConditions/properties/feelLikesTemperature."
-            },
-            "relativeHumidity": {
-              "$ref": "https://smart-data-models.github.io/dataModel.Weather/weather-schema.json#/definitions/Weather-AirConditions/properties/relativeHumidity."
-            }
-          }
-        },
-        "dayMinimum": {
-          "type": "object",
-          "description": "Property. Model:'https://schema.org/Text'. Minimum values forecasted for the reported period. Minimum values for the reported period. Subattributes:- `temperature` : Minimum temperature. See `WeatherForecast.temperature` for description and units. - `feelLikesTemperature`. Minimum feels like temperature. Same semantics and units as `WeatherForecast.feelsLikeTemperature`.- `relativeHumidity`. Minimum relative humidity. Same semantics and units as `WeatherForecast.relativeHumidity`.",
-          "properties": {
-            "temperature": {
-              "$ref": "https://smart-data-models.github.io/dataModel.Weather/weather-schema.json#/definitions/Weather-AirConditions/properties/temperature."
-            },
-            "feelLikesTemperature": {
-              "$ref": "https://smart-data-models.github.io/dataModel.Weather/weather-schema.json#/definitions/Weather-AirConditions/properties/feelLikesTemperature."
-            },
-            "relativeHumidity": {
-              "$ref": "https://smart-data-models.github.io/dataModel.Weather/weather-schema.json#/definitions/Weather-AirConditions/properties/relativeHumidity."
-            }
-          }
         },
         "uVIndexMax": {
           "type": "array",
