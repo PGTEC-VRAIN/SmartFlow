@@ -1,0 +1,7 @@
+pandas
+rasterio
+numpy
+requests
+geopandas
+shapely
+docker

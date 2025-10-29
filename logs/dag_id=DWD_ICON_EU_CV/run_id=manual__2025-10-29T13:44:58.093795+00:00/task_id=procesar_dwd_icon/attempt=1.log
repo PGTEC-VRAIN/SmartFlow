@@ -1,0 +1,28 @@
+{"timestamp":"2025-10-29T13:44:59.872914","level":"info","event":"DAG bundles loaded: dags-folder","logger":"airflow.dag_processing.bundles.manager.DagBundlesManager"}
+{"timestamp":"2025-10-29T13:44:59.875572","level":"info","event":"Filling up the DagBag from /opt/airflow/dags/DWD_ICON_EU.py","logger":"airflow.models.dagbag.DagBag"}
+{"timestamp":"2025-10-29T13:45:02.086281Z","level":"info","event":"🔄 Llamando al servicio API en la red interna de Docker: http://openmeteo-api:8080/v1/forecast ...","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T13:45:02.087028Z","level":"info","event":"  ➡️ Solicitando datos para lat=39.13, lon=-1.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T13:45:02.316966Z","level":"info","event":"  ➡️ Solicitando datos para lat=39.13, lon=-0.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T13:45:02.534830Z","level":"info","event":"  ➡️ Solicitando datos para lat=39.13, lon=-1.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T13:45:02.749598Z","level":"info","event":"  ➡️ Solicitando datos para lat=39.13, lon=-0.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T13:45:02.964815Z","level":"info","event":"  ➡️ Solicitando datos para lat=39.13, lon=-1.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T13:45:03.180788Z","level":"info","event":"  ➡️ Solicitando datos para lat=39.13, lon=-0.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T13:45:03.395917Z","level":"info","event":"  ➡️ Solicitando datos para lat=39.13, lon=-1.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T13:45:03.612573Z","level":"info","event":"  ➡️ Solicitando datos para lat=39.13, lon=-0.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T13:45:03.828685Z","level":"info","event":"  ➡️ Solicitando datos para lat=40.13, lon=-1.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T13:45:04.043110Z","level":"info","event":"  ➡️ Solicitando datos para lat=40.13, lon=-0.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T13:45:04.258267Z","level":"info","event":"  ➡️ Solicitando datos para lat=40.13, lon=-1.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T13:45:04.475783Z","level":"info","event":"  ➡️ Solicitando datos para lat=40.13, lon=-0.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T13:45:04.692801Z","level":"info","event":"  ➡️ Solicitando datos para lat=40.13, lon=-1.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T13:45:04.909726Z","level":"info","event":"  ➡️ Solicitando datos para lat=40.13, lon=-0.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T13:45:05.126360Z","level":"info","event":"  ➡️ Solicitando datos para lat=40.13, lon=-1.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T13:45:05.341966Z","level":"info","event":"  ➡️ Solicitando datos para lat=40.13, lon=-0.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T13:45:05.559331Z","level":"info","event":"","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T13:45:05.559603Z","level":"info","event":"🏁 Descarga completada en 3.47 s (0.06 min)","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T13:45:05.575898Z","level":"info","event":"📦 Total registros: 2688","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T13:45:05.581700Z","level":"info","event":"Variables del JSON:  dict_keys(['id', 'dateIssued', 'type', 'windSpeed', 'timestamp', 'precipitation', 'lat', 'lon'])","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T13:45:05.581977Z","level":"info","event":"Cantidad de datos de precipitación descargados:  2688","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T13:45:05.582195Z","level":"info","event":"FIN DEL PROCESO DE DESCARGA DE PREDICCIONES HARMONIE-AROME DE AEMET.","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T13:45:05.582316Z","level":"info","event":"","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T13:45:05.582421Z","level":"info","event":" FIN","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T13:45:05.582744","level":"info","event":"Done. Returned value was: None","logger":"airflow.task.operators.airflow.providers.standard.operators.python.PythonOperator"}

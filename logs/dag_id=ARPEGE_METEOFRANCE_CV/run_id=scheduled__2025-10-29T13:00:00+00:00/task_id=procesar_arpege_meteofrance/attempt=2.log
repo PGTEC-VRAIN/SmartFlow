@@ -1,0 +1,28 @@
+{"timestamp":"2025-10-29T14:07:21.638619","level":"info","event":"DAG bundles loaded: dags-folder","logger":"airflow.dag_processing.bundles.manager.DagBundlesManager"}
+{"timestamp":"2025-10-29T14:07:21.640173","level":"info","event":"Filling up the DagBag from /opt/airflow/dags/ARPEGE.py","logger":"airflow.models.dagbag.DagBag"}
+{"timestamp":"2025-10-29T14:07:23.992601Z","level":"info","event":"🔄 Llamando al servicio API en la red interna de Docker: http://openmeteo-api:8080/v1/forecast ...","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T14:07:23.993248Z","level":"info","event":"  ➡️ Solicitando datos para lat=39.13, lon=-1.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T14:07:24.224978Z","level":"info","event":"  ➡️ Solicitando datos para lat=39.13, lon=-0.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T14:07:24.440927Z","level":"info","event":"  ➡️ Solicitando datos para lat=39.13, lon=-1.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T14:07:24.679411Z","level":"info","event":"  ➡️ Solicitando datos para lat=39.13, lon=-0.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T14:07:24.966131Z","level":"info","event":"  ➡️ Solicitando datos para lat=39.13, lon=-1.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T14:07:25.190584Z","level":"info","event":"  ➡️ Solicitando datos para lat=39.13, lon=-0.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T14:07:25.434407Z","level":"info","event":"  ➡️ Solicitando datos para lat=39.13, lon=-1.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T14:07:25.650798Z","level":"info","event":"  ➡️ Solicitando datos para lat=39.13, lon=-0.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T14:07:25.891771Z","level":"info","event":"  ➡️ Solicitando datos para lat=40.13, lon=-1.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T14:07:26.111894Z","level":"info","event":"  ➡️ Solicitando datos para lat=40.13, lon=-0.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T14:07:26.354257Z","level":"info","event":"  ➡️ Solicitando datos para lat=40.13, lon=-1.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T14:07:26.571017Z","level":"info","event":"  ➡️ Solicitando datos para lat=40.13, lon=-0.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T14:07:26.794492Z","level":"info","event":"  ➡️ Solicitando datos para lat=40.13, lon=-1.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T14:07:27.057907Z","level":"info","event":"  ➡️ Solicitando datos para lat=40.13, lon=-0.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T14:07:27.275373Z","level":"info","event":"  ➡️ Solicitando datos para lat=40.13, lon=-1.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T14:07:27.539958Z","level":"info","event":"  ➡️ Solicitando datos para lat=40.13, lon=-0.52","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T14:07:27.767864Z","level":"info","event":"","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T14:07:27.768192Z","level":"info","event":"🏁 Descarga completada en 3.77 s (0.06 min)","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T14:07:27.887671Z","level":"info","event":"📦 Total registros: 2688","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T14:07:27.901731Z","level":"info","event":"Datos del modelo meteofrance_arpege_europe descargados correctamente.","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T14:07:27.902049Z","level":"info","event":"Variables del JSON:  dict_keys(['id', 'dateIssued', 'type', 'temperature', 'relativeHumidity', 'timestamp', 'precipitation', 'precipitationProbability', 'solarRadiation', 'lat', 'lon'])","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T14:07:27.902496Z","level":"info","event":"Cantidad de datos de precipitación descargados:  0","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T14:07:27.902744Z","level":"info","event":"","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T14:07:27.902924Z","level":"info","event":" FIN","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-29T14:07:27.900726","level":"info","event":"Done. Returned value was: None","logger":"airflow.task.operators.airflow.providers.standard.operators.python.PythonOperator"}
