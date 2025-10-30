@@ -1,0 +1,20 @@
+{"timestamp":"2025-10-30T12:44:13.307656","level":"info","event":"DAG bundles loaded: dags-folder","logger":"airflow.dag_processing.bundles.manager.DagBundlesManager"}
+{"timestamp":"2025-10-30T12:44:13.311192","level":"info","event":"Filling up the DagBag from /opt/airflow/dags/EFFIS.py","logger":"airflow.models.dagbag.DagBag"}
+{"timestamp":"2025-10-30T12:44:14.932229Z","level":"info","event":"2025-09-29 12:44:14.931857","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-30T12:44:14.932620Z","level":"info","event":"🕒 Fecha de descarga: 2025-10-30T12:44:14.932025","chan":"stdout","logger":"task"}
+{"timestamp":"2025-10-30T12:44:15.670917Z","level":"error","event":"2025-10-30 12:44:15,670 INFO [2024-02-01T00:00:00] An issue has been identified with version 1.0 of this dataset that leads to an underestimation of the FWI values and subsequent indicators in this dataset. Version 2.0 provides corrected data and users are advised to update any data they have downloaded previously.","chan":"stderr","logger":"task"}
+{"timestamp":"2025-10-30T12:44:15.670893","level":"info","event":"[2024-02-01T00:00:00] An issue has been identified with version 1.0 of this dataset that leads to an underestimation of the FWI values and subsequent indicators in this dataset. Version 2.0 provides corrected data and users are advised to update any data they have downloaded previously.","logger":"ecmwf.datastores.legacy_client"}
+{"timestamp":"2025-10-30T12:44:15.671632Z","level":"error","event":"2025-10-30 12:44:15,671 INFO [2025-01-29T00:00:00] This dataset is no longer supported by the data providers. Data and documentation are provided as is. Users are encouraged to use our [Forum](https://forum.ecmwf.int/) to raise any item of discussion with respect to this dataset.","chan":"stderr","logger":"task"}
+{"timestamp":"2025-10-30T12:44:15.671509","level":"info","event":"[2025-01-29T00:00:00] This dataset is no longer supported by the data providers. Data and documentation are provided as is. Users are encouraged to use our [Forum](https://forum.ecmwf.int/) to raise any item of discussion with respect to this dataset.","logger":"ecmwf.datastores.legacy_client"}
+{"timestamp":"2025-10-30T12:44:15.672329Z","level":"error","event":"2025-10-30 12:44:15,672 INFO Request ID is 13272be8-535a-420d-967b-188ab74261e3","chan":"stderr","logger":"task"}
+{"timestamp":"2025-10-30T12:44:15.672337","level":"info","event":"Request ID is 13272be8-535a-420d-967b-188ab74261e3","logger":"ecmwf.datastores.legacy_client"}
+{"timestamp":"2025-10-30T12:44:15.766832Z","level":"error","event":"2025-10-30 12:44:15,766 INFO status has been updated to accepted","chan":"stderr","logger":"task"}
+{"timestamp":"2025-10-30T12:44:15.766763","level":"info","event":"status has been updated to accepted","logger":"ecmwf.datastores.legacy_client"}
+{"timestamp":"2025-10-30T12:44:29.559791Z","level":"error","event":"2025-10-30 12:44:29,559 INFO status has been updated to running","chan":"stderr","logger":"task"}
+{"timestamp":"2025-10-30T12:44:29.559756","level":"info","event":"status has been updated to running","logger":"ecmwf.datastores.legacy_client"}
+{"timestamp":"2025-10-30T12:44:37.230640Z","level":"error","event":"2025-10-30 12:44:37,230 INFO status has been updated to accepted","chan":"stderr","logger":"task"}
+{"timestamp":"2025-10-30T12:44:37.230579","level":"info","event":"status has been updated to accepted","logger":"ecmwf.datastores.legacy_client"}
+{"timestamp":"2025-10-30T12:44:48.709111Z","level":"error","event":"2025-10-30 12:44:48,708 INFO status has been updated to running","chan":"stderr","logger":"task"}
+{"timestamp":"2025-10-30T12:44:48.709102","level":"info","event":"status has been updated to running","logger":"ecmwf.datastores.legacy_client"}
+{"timestamp":"2025-10-30T13:03:29.516947Z","level":"error","event":"Server indicated the task shouldn't be running anymore. Terminating process","detail":{"detail":{"reason":"not_found","message":"Task Instance not found"}},"logger":"task"}
+{"timestamp":"2025-10-30T13:03:34.554676Z","level":"error","event":"Task killed!","logger":"task"}

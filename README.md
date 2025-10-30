@@ -127,58 +127,149 @@ To get a local copy up and running follow these simple steps in ubuntu command l
    cd SmartFlow
    ``` 
 
-2. Create a virtual environment
+2. Initialize docker containers
    ```sh
-   python -m venv venv
-   source venv/bin/activate 
-   ```
-
-3. Install the required packages
-   ```sh
-   pip install -r requirements.txt
-   ```
-
-4. Initialize Airflow
-   ```sh
-   airflow standalone
+   docker compose up --build -d
    ```
 
 Here is a brief explanation of the Python scripts:
 
-- `AEMET_HARMONIE_AROME.py`: This script retrieves weather forecast data from the AEMET website and processes it into a standardized format defined by the `WeatherForecastSeries.py` Smart Data Model.
-The input data are GeoTIFF (.tif) files containing weather variables encoded as color values.
-Using a color scale provided by AEMET, the script converts these color codes (RGBA) into real physical values such as temperature, wind speed, and precipitation.
+- `AEMET_HARMONIE_AROME.py`: Python script that retrieves weather forecast data from the AEMET website and processes it programatically using airflow sintaxis
 
-No API key is required for execution as we are downloading public data from AEMET website.
-Run this script hourly to ensure the latest forecasts are always retrieved and processed.
+  - **Data**: All the data is processed into a standardized format defined by the `WeatherForecastSeries.py` Smart Data Model. The variables we are currently using are:
+    - Temperature 
+    - Precipitation
+    - Wind Speed 
 
-- `ARPEGE-AROME.py`: This script retrieves weather forecast data for the model ARPEGE-AROME from the MeteoFrance website and processes it into a standardized format defined by the `WeatherForecastSeries.py` Smart Data Model.
+  - **Raw Data**: The input data are GeoTIFF (.tif) files containing weather variables encoded as color values. Using a color scale provided by AEMET, the script converts these color codes (RGBA) into real physical values such as temperature, wind speed, and precipitation.
 
-Data format xxxx
-API Key xxxx
-Run script xxxx
+  - **API Key**: No API key is required for execution as we are downloading public data from AEMET website.
+
+  - **Run script**: Run hourly to ensure the latest forecasts are always retrieved and processed.
  
-- `Open-Meteo.py`: This script retrieves weather data from the Open-Meteo API and processes it into a standardized format using `WeatherForecastSeries.py` Smart Data Model. The input data are JSON files. Here are the weather models that we are currently using:
+All the following scripts retrieve data from OpenMeteo API:
 
-- ICON-EU DWD (`dwd_icon_eu`)
-- ARPEGE MétéoFrance (`meteofrance_arpege_europe`)
-- HRES/IFS 9km Resolution ECMWF  (`ecmwf_ifs`)
-- GFS NOAA (`ncep_gfs013`o `ncep_gfs025`)
-- AIFS ECMWF (modelo de IA) (`ecmwf_aifs025`)
-- GEPS_ENS CMC (`cmc_gem_geps`)
-- SEAS5_ECMWF Copernicus (`ecmwf_seas5_6hourly`)
+- `AIFS_ECMWF.py.py`: Python script that retrieves weather data from the Open-Meteo API programamatically using airflow sintaxis.
 
-No API key is required for execution.
-Run this script hourly to ensure the latest forecasts are always retrieved and processed.
+  - **Data**: processes it into a standardized format using `WeatherForecastSeries.py` Smart Data Model. 
 
-- `Copernicus.py`: This script retrieves weather forecast data from the Copernicus Climate Data Store (CDS) API and Early Warning Data Store (EWDS) and processes it into a standardized format defined by the `WeatherForecastSeries.py` Smart Data Model. The input data are NetCDF (.nc) files containing various weather variables. The weather models currently used are:
+  - **Raw Data**: The input data are JSON files. The variables we are currently using are:
+    - Temperature 
+    - Precipitation
+    - Wind Speed
 
-- EFFIS (a través del EWDS de Copernicus, no hay tiempo real, Catalogue — CEMS Early Warning Data Store) 
-- EFAS (a través del EWDS de Copernicus, no hay tiempo real, Catalogue — CEMS Early Warning Data Store)
+  - **API Key**: No API key is required for execution as we are downloading public data from Open-Meteo API.
 
-An API key is required for execution. To get an API key, you need to register on the Copernicus Climate Data Store website: https://cds.climate.copernicus.eu
+  - **Run script**: Run hourly to ensure the latest forecasts are always retrieved and processed.
 
-Run this script daily to ensure the latest forecasts are always retrieved and processed.
+- `ARPEGE.py`: Python script that retrieves weather data from the Open-Meteo API programamatically using airflow sintaxis.
+
+  - **Data**: processes it into a standardized format using `WeatherForecastSeries.py` Smart Data Model. 
+
+  - **Raw Data**: The input data are JSON files. The variables we are currently using are:
+    - Temperature 
+    - Precipitation
+    - Relative Humidity
+    - Solar Radiation
+
+  - **API Key**: No API key is required for execution as we are downloading public data from Open-Meteo API.
+
+  - **Run script**: Run hourly to ensure the latest forecasts are always retrieved and processed.
+
+- `DWD_ICON_EU.py`: Python script that retrieves weather data from the Open-Meteo API programmatically using airflow sintaxis.
+
+  - **Data**: processes it into a standardized format using `WeatherForecastSeries.py` Smart Data Model. 
+
+  - **Raw Data**: The input data are JSON files. The variables we are currently using are:
+    - Temperature 
+    - Precipitation
+
+  - **API Key**: No API key is required for execution as we are downloading public data from Open-Meteo API.
+
+  - **Run script**: Run hourly to ensure the latest forecasts are always retrieved and processed.
+
+- `GEPS_ENS_CNC.py`: Python script that retrieves weather data from the Open-Meteo API programamatically using airflow sintaxis.
+
+  - **Data**: processes it into a standardized format using `WeatherForecastSeries.py` Smart Data Model. 
+
+  - **Raw Data**: The input data are JSON files. The variables we are currently using are:
+    - Temperature 
+    - Precipitation
+    - Wind Speed
+
+  - **API Key**: No API key is required for execution as we are downloading public data from Open-Meteo API.
+
+  - **Run script**: Run hourly to ensure the latest forecasts are always retrieved and processed.
+
+- `GFS_NOAA.py`: Python script that retrieves weather data from the Open-Meteo API programamatically using airflow sintaxis.
+
+  - **Data**: processes it into a standardized format using `WeatherForecastSeries.py` Smart Data Model. 
+
+  - **Raw Data**: The input data are JSON files. The variables we are currently using are:
+    - Temperature 
+    - Precipitation
+    - Wind Speed
+    - Solar Radiation
+
+  - **API Key**: No API key is required for execution as we are downloading public data from Open-Meteo API.
+
+  - **Run script**: Run hourly to ensure the latest forecasts are always retrieved and processed.
+
+
+- `IFS9km_ECMWF.py`: Python script that retrieves weather data from the Open-Meteo API programamatically using airflow sintaxis.
+
+  - **Data**: processes it into a standardized format using `WeatherForecastSeries.py` Smart Data Model. 
+
+  - **Raw Data**: The input data are JSON files. The variables we are currently using are:
+    - Temperature 
+    - Precipitation
+    - Wind Speed
+
+  - **API Key**: No API key is required for execution as we are downloading public data from Open-Meteo API.
+
+  - **Run script**: Run hourly to ensure the latest forecasts are always retrieved and processed.
+
+- `Seas5_ECWMF_copernicus.py`: Python script that retrieves weather data from the Open-Meteo API programamatically using airflow sintaxis.
+
+  - **Data**: processes it into a standardized format using `WeatherForecastSeries.py` Smart Data Model. 
+
+  - **Raw Data**: The input data are JSON files. The variables we are currently using are:
+    - Temperature 
+    - Precipitation
+    - Wind Speed
+    - Solar Radiation
+
+  - **API Key**: No API key is required for execution as we are downloading public data from Open-Meteo API.
+
+  - **Run script**: Run hourly to ensure the latest forecasts are always retrieved and processed.
+
+The last two scrips retrieve data from Copernicus Climate Data Store (CDS) API and Early Warning Data Store (EWDS):
+
+- `EFFIS.py`: Python script that retrieves weather data from the CDS API programamatically using airflow sintaxis. 
+
+  - **Data**: processes it into a standardized format using `WeatherForecastSeries.py` Smart Data Model. 
+
+  - **Raw Data**: The input data are NetCDF (.nc) files containing various weather variables:
+    - Temperature 
+    - Precipitation
+    - Wind Speed
+
+  - **API Key**: An API key is required for execution. To get an API key, you need to register on the Copernicus Climate Data Store website: https://cds.climate.copernicus.eu
+
+  - **Run script**: Run this script daily because Copernicus updates the data once a day. It has been configured to automatically detect the latest available forecast.
+
+- `EFAS.py`: Python script that retrieves weather data from the EWDS API programamatically using airflow sintaxis.
+
+  - **Data**: processes it into a standardized format using `WeatherForecastSeries.py` Smart Data Model. 
+
+  - **Raw Data**: The input data are NetCDF (.nc) files containing various weather variables:
+    - Temperature 
+    - Precipitation
+    - Wind Speed
+
+  - **API Key**: An API key is required for execution. To get an API key, you need to register on the Copernicus Climate Data Store website: https://cds.climate.copernicus.eu
+
+  - **Run script**: Run this script daily because Copernicus updates the data once a day. It has been configured to automatically detect the latest available forecast.
 
 <!--
 ### Prerequisites
