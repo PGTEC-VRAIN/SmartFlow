@@ -149,7 +149,7 @@ Here is a brief explanation of the Python scripts:
  
 All the following scripts retrieve data from OpenMeteo API:
 
-- `AIFS_ECMWF.py.py`: Python script that retrieves weather data from the Open-Meteo API programamatically using airflow sintaxis.
+- `AIFS_ECMWF.py`: Python script that retrieves weather data from the Open-Meteo API programamatically using airflow sintaxis.
 
   - **Data**: processes it into a standardized format using `WeatherForecastSeries.py` Smart Data Model. 
 
@@ -384,9 +384,9 @@ Project Link: [https://github.com/PGTEC-VRAIN](https://github.com/PGTEC-VRAIN)
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[Python]: https://img.shields.io/badge/python-3.10+-blue.svg?logo=python&logoColor=white
+[Python]: https://img.shields.io/badge/python-3.12.11+-blue.svg?logo=python&logoColor=white
 [Python-url]: https://www.python.org/
-[Airflow]: https://img.shields.io/badge/airflow-2.x-darkblue.svg?logo=apacheairflow&logoColor=white
+[Airflow]: https://img.shields.io/badge/airflow-3.0.6-darkblue.svg?logo=apacheairflow&logoColor=white
 [Airflow-url]: https://airflow.apache.org/
 [Smart-data-models]: https://img.shields.io/badge/smartdata-models-fiware
 [Smart-Data-models-url]: https://github.com/smart-data-models/dataModel.Weather
