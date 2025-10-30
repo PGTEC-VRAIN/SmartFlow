@@ -245,27 +245,23 @@ All the following scripts retrieve data from OpenMeteo API:
 
 The last two scrips retrieve data from Copernicus Climate Data Store (CDS) API and Early Warning Data Store (EWDS):
 
-- `EFFIS.py`: Python script that retrieves weather data from the CDS API programamatically using airflow sintaxis. 
+- `EFFIS.py`: Python script that retrieves weather data from the dataset (https://cds.climate.copernicus.eu/datasets/sis-tourism-fire-danger-indicators?tab=overview) and download data programamatically using airflow sintaxis. 
 
   - **Data**: processes it into a standardized format using `WeatherForecastSeries.py` Smart Data Model. 
 
   - **Raw Data**: The input data are NetCDF (.nc) files containing various weather variables:
-    - Temperature 
-    - Precipitation
-    - Wind Speed
+    - Daily fire weather index
 
   - **API Key**: An API key is required for execution. To get an API key, you need to register on the Copernicus Climate Data Store website: https://cds.climate.copernicus.eu
 
   - **Run script**: Run this script daily because Copernicus updates the data once a day. It has been configured to automatically detect the latest available forecast.
 
-- `EFAS.py`: Python script that retrieves weather data from the EWDS API programamatically using airflow sintaxis.
+- `EFAS.py`: Python script that retrieves weather data from the EWDS dataset (https://ewds.climate.copernicus.eu/datasets/efas-forecast?tab=overview) and download data programamatically using airflow sintaxis.
 
   - **Data**: processes it into a standardized format using `WeatherForecastSeries.py` Smart Data Model. 
 
-  - **Raw Data**: The input data are NetCDF (.nc) files containing various weather variables:
-    - Temperature 
-    - Precipitation
-    - Wind Speed
+  - **Raw Data**: The input data are NetCDF (.nc) files containing the following weather variable:
+    - River discharge last 6 hours
 
   - **API Key**: An API key is required for execution. To get an API key, you need to register on the Copernicus Climate Data Store website: https://cds.climate.copernicus.eu
 
