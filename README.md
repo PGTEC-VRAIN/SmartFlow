@@ -108,8 +108,8 @@ The project is built using the following main components:
 <div align="center">
 
   | <!-- -->                                   | <!-- -->             | <!-- -->            |
-  |:-------------------------------------------:|:--------------------:|:-------------------:|
-  | [![Python][Python]][Python-url]             | [![Airflow][Airflow]][Airflow-url]   | [![Smart-data-models][Smart-data-models]][Smart-Data-models-url] |
+  |:-------------------------------------------:|:--------------------:|:-------------------:|:---------------------:|
+  | [![Python][Python]][Python-url] | [![Airflow][Airflow]][Airflow-url] | [![Smart-data-models][Smart-data-models]][Smart-Data-models-url] | [![Docker][Docker]][Docker-url] |
 
 
 </div>
@@ -127,7 +127,12 @@ To get a local copy up and running follow these simple steps in ubuntu command l
    cd SmartFlow
    ``` 
 
-2. Initialize docker containers
+2. Initialize docker:
+   ```sh
+   sudo systemctl start docker
+   ```
+
+3. Initialize docker containers
    ```sh
    docker compose up --build -d
    ```
@@ -382,7 +387,9 @@ Project Link: [https://github.com/PGTEC-VRAIN](https://github.com/PGTEC-VRAIN)
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 [Python]: https://img.shields.io/badge/python-3.12.11+-blue.svg?logo=python&logoColor=white
 [Python-url]: https://www.python.org/
-[Airflow]: https://img.shields.io/badge/airflow-3.0.6-darkblue.svg?logo=apacheairflow&logoColor=white
+[Airflow]: https://img.shields.io/badge/airflow-3.0.6-green.svg?logo=apacheairflow&logoColor=white
 [Airflow-url]: https://airflow.apache.org/
-[Smart-data-models]: https://img.shields.io/badge/smartdata-models-fiware
+[Smart-data-models]: https://img.shields.io/badge/SmartDataModels-purple.svg
 [Smart-Data-models-url]: https://github.com/smart-data-models/dataModel.Weather
+[Docker-url]: https://www.docker.com/
+[Docker]: https://img.shields.io/badge/docker-44.4.3+-red.svg?logo=python&logoColor=white
