@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$schemaVersion": "0.0.3",
   "modelTags": "",
-  "$id": "https://raw.githubusercontent.com/PGTEC-VRAIN/SmartFlow/main/SmartDataModels/WeatherForcastSeries.json",
+  "$id": "https://raw.githubusercontent.com/PGTEC-VRAIN/SmartFlow/main/SmartDataModels/WeatherForcastSeries/schema.json",
   "title": " - Weather Forecast schema",
   "description": "A harmonised description of a Weather Forecast time Series.",
   "type": "object",
