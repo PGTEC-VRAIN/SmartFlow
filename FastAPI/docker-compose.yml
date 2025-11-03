@@ -1,0 +1,17 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  smartflow-api:
+    # Construye la imagen usando el Dockerfile en el directorio actual
+    build: .
+    # Mapea el puerto 8000 del contenedor al puerto 8000 de tu máquina host
+    ports:
+      - "8000:8000"
+    # Reinicia automáticamente si falla
+    restart: always
+    # Configuración opcional: Montar datos grandes como volumen
+    # Si tus archivos NetCDF están en una carpeta llamada 'data' en tu host:
+    volumes:
+      - ./data:/app/data_files
+    # Nota: Si usas volúmenes, ajusta el path de xr.open_dataset() a /app/data_files/archivo.nc
