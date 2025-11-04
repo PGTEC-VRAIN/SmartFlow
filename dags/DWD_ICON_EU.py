@@ -2,6 +2,7 @@
 # 🛰️ Open-Meteo Data Collector
 # ============================================================
 
+import json
 import requests
 import pandas as pd
 import time
@@ -15,6 +16,7 @@ from airflow.operators.python import PythonOperator
 from airflow import DAG
 from datetime import datetime, timedelta
 import datetime as dt
+import os
 # --- CONFIGURACIÓN BÁSICA DEL DAG ---
 default_args = {
     'owner': 'AlexPGTEC',
@@ -54,23 +56,14 @@ def sacar_limite_CV(file_path: str):
 
     return lats_in, lons_in
 
-# # Límites rectangulares aproximados de la comunitat valenciana
-# lat_min, lat_max = 37.698098, 40.885909
-# lon_min, lon_max = -1.953683, 1.100229
-
-# # Crear malla de puntos con paso, por ejemplo, 0.1°
-# step = 1#0.1
-# lats = np.arange(lat_min, lat_max + 1e-6, step)
-# lons = np.arange(lon_min, lon_max + 1e-6, step)
-
 # Carpeta donde guardar los datos (CSV temporal)
 DATA_DIR = Path("data")
 DATA_DIR.mkdir(exist_ok=True)
 MODELO = "dwd_icon_eu"#"gfs_global" #"meteofrance_arpege_europe" #"ecmwf_ifs"
 VARIABLES = ["temperature_2m","precipitation"]
-now = datetime.now()  # o .utcnow() si quieres UTC
-filename = now.strftime("%Y%m%d_%H%M") +"_"+ MODELO+".csv"
-DATA_FILE = DATA_DIR / filename
+# now = datetime.now()  # o .utcnow() si quieres UTC
+# filename = now.strftime("%Y%m%d_%H%M") +"_"+ MODELO+".csv"
+# DATA_FILE = DATA_DIR / filename
 
 
 def fetch_forecast(lats, lons):
@@ -172,36 +165,55 @@ def fetch_forecast(lats, lons):
         return pd.DataFrame(), download_time
 
 
-def append_forecast(df):
-    """Guarda los datos en CSV (append si ya existe)"""
-    if DATA_FILE.exists() and df.shape[0]>0:
-        old_df = pd.read_csv(DATA_FILE, parse_dates=["time", "downloaded_at"])
-        df = pd.concat([old_df, df]).drop_duplicates(subset=["time"]).reset_index(drop=True)
-    else:
-        pass
-    return df 
+# def append_forecast(df):
+#     """Guarda los datos en CSV (append si ya existe)"""
+#     print(f"💾 Guardando datos en {DATA_FILE} ...")
+#     if DATA_FILE.exists() and df.shape[0]>0:
+#         old_df = pd.read_csv(DATA_FILE, parse_dates=["time", "downloaded_at"])
+#         df = pd.concat([old_df, df]).drop_duplicates(subset=["time"]).reset_index(drop=True)
+#     df.to_csv(DATA_FILE, index=False)
+#     return df 
 
 def ejecutar_descarga_dwd():
     lats, lons = sacar_limite_CV("/opt/airflow/data/F162C175_Demarcacion.geojson")
 
     df, download_time = fetch_forecast(lats, lons)
 
-    df = append_forecast(df)
+    grouped = df.groupby(['latitude', 'longitude'])
+        
+    forecasts_list = []
+        
+    # 2. Iterar sobre cada grupo y crear objetos WeatherForecastSeries
+    for (lat, lon), group_df in grouped:
+        point_forecast = WeatherForecastSeries(
+            lat=lat,
+            lon=lon,
+            timestamp = group_df["time"].tolist(),
+            precipitation = group_df["precipitation"].to_list(),
+            temperature = group_df["temperature_2m"].to_list()
+        )
+        # Convertir el objeto Pydantic a un diccionario de Python
+        forecasts_list.append(point_forecast.model_dump()) # Usamos model_dump() (o .dict() si es Pydantic v1)
+    print(point_forecast)
+    # 3. Crear el Diccionario Contenedor Final
+    # Este objeto NO necesita ser una clase Pydantic si solo se usa para guardar en disco
+    final_data_dict = {
+        "id": f"{MODELO}_{download_time}",
+        "dateIssued": download_time,
+        "forecasts": forecasts_list  # Lista de diccionarios de pronósticos
+    }
 
-    datos = WeatherForecastSeries(
-    id= MODELO + "_" + download_time,
-    dateIssued=download_time,
-    timestamp = df["time"].tolist(),
-    lat = df["latitude"].tolist(),
-    lon = df["longitude"].tolist(),
-    precipitation = df["precipitation"].to_list(),
-    temperature = df["temperature_2m"].to_list()
-)
-    datos_dict = datos._to_dict()
-    print("Variables del JSON: ",datos_dict.keys())
-    print("Cantidad de datos de precipitación descargados: ",len(datos_dict["precipitation"]))
+    # 4. Guardar el archivo (lógica de Airflow)
+    os.makedirs(DATA_DIR, exist_ok=True)
+    print("💾 Guardando datos en archivo JSON en ", DATA_DIR)
+    filename = f"{MODELO}_{download_time.replace(':', '-')}.json"
+    file_path = os.path.join(DATA_DIR, filename)
+
+    with open(file_path, 'w') as f:
+        json.dump(final_data_dict, f, indent=4)
+
+    print(f"Total de puntos de pronóstico guardados: {len(forecasts_list)}")
     print("FIN DEL PROCESO DE DESCARGA DE PREDICCIONES ICON_EU DE DWD.")
-    print("\n FIN")
 
 with DAG(
     dag_id='DWD_ICON_EU_CV',
