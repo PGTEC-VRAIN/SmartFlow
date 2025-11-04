@@ -145,6 +145,7 @@ def procesar_EFAS():
 
     df["valid_time"] = df["valid_time"].astype(str)
     print("CANTIDAD DE DATOS DESCARGADOS DE EFAS: ",len(df))
+    print(df.head())
     
     datos = WeatherForecastSeries(
         id="EFAS_" + download_time,

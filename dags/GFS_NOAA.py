@@ -7,7 +7,6 @@ import pandas as pd
 import time
 from pathlib import Path
 import numpy as np
-import subprocess
 from SmartDataModels.WeatherForecastSeries import WeatherForecastSeries
 import geopandas as gpd
 from shapely.geometry import Point
@@ -15,7 +14,17 @@ from airflow.operators.python import PythonOperator
 from airflow import DAG
 from datetime import datetime, timedelta
 import datetime as dt
+import os, json
+
 # --- CONFIGURACIÓN BÁSICA DEL DAG ---
+
+
+# Carpeta donde guardar los datos JSON
+DATA_DIR = Path("FastAPI/data")
+DATA_DIR.mkdir(exist_ok=True)
+MODELO = "ncep_gfs013"#"gfs_global" #"meteofrance_arpege_europe" #"ecmwf_ifs"
+VARIABLES = ["temperature_2m","precipitation","wind_speed_10m","shortwave_radiation"]
+
 default_args = {
     'owner': 'AlexPGTEC',
     'depends_on_past': False,
@@ -25,7 +34,13 @@ default_args = {
     'retry_delay': timedelta(minutes=10),
 }
 # Configuración del endpoint y parámetros
-API_URL = "http://openmeteo-api:8080/v1/forecast" #"http://127.0.0.1:8080/v1/forecast"
+API_URL = "https://api.open-meteo.com/v1/forecast" #"http://openmeteo-api:8080/v1/forecast" #"http://127.0.0.1:8080/v1/forecast"
+
+def json_serial(obj):
+    """Convierte objetos datetime a string ISO 8601."""
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
 
 def sacar_limite_CV(file_path: str):
     # 1. Cargar el GeoJSON
@@ -53,15 +68,6 @@ def sacar_limite_CV(file_path: str):
     lats_in, lons_in = map(list, zip(*puntos_dentro))
 
     return lats_in, lons_in
-
-# Carpeta donde guardar los datos (CSV temporal)
-DATA_DIR = Path("data")
-DATA_DIR.mkdir(exist_ok=True)
-MODELO = "ncep_gfs013"#"gfs_global" #"meteofrance_arpege_europe" #"ecmwf_ifs"
-VARIABLES = ["temperature_2m","precipitation","wind_speed_10m","shortwave_radiation"]
-now = datetime.now()  # o .utcnow() si quieres UTC
-filename = now.strftime("%Y%m%d_%H%M") +"_"+ MODELO+".csv"
-DATA_FILE = DATA_DIR / filename
 
 
 def fetch_forecast(lats, lons):
@@ -163,37 +169,47 @@ def fetch_forecast(lats, lons):
         return pd.DataFrame(), download_time
 
 
-def append_forecast(df):
-    """Guarda los datos en CSV (append si ya existe)"""
-    if DATA_FILE.exists() and df.shape[0]>0:
-        old_df = pd.read_csv(DATA_FILE, parse_dates=["time", "downloaded_at"])
-        df = pd.concat([old_df, df]).drop_duplicates(subset=["time"]).reset_index(drop=True)
-    else:
-        pass
-    return df 
-
 def ejecutar_descarga_gfs():
     lats, lons = sacar_limite_CV("/opt/airflow/data/F162C175_Demarcacion.geojson")
 
     df, download_time = fetch_forecast(lats, lons)
 
-    df = append_forecast(df)
-
-    datos = WeatherForecastSeries(
-    id= MODELO + "_" + download_time,
-    dateIssued=download_time,
-    timestamp = df["time"].tolist(),
-    lat = df["latitude"].tolist(),
-    lon = df["longitude"].tolist(),
-    precipitation = df["precipitation"].to_list(),
-    temperature = df["temperature_2m"].to_list(),
-    windSpeed = df["wind_speed_10m"].to_list(),
-    shortwaveRadiation = df["shortwave_radiation"].to_list()
+    grouped = df.groupby(['latitude', 'longitude'])
+        
+    forecasts_list = []
+        
+    # 2. Iterar sobre cada grupo y crear objetos WeatherForecastSeries
+    for (lat, lon), group_df in grouped:
+            
+        point_forecast = WeatherForecastSeries(
+        id= MODELO + "_" + download_time,
+        dateIssued=download_time,
+        lat=lat,
+        lon=lon,
+        timestamp = group_df["time"].dropna().tolist(),
+        precipitation = group_df["precipitation"].dropna().to_list(),
+        temperature = group_df["temperature_2m"].dropna().to_list(),
+        windSpeed = group_df["wind_speed_10m"].dropna().to_list(),
+        solarRadiation = group_df["shortwave_radiation"].dropna().to_list(),
 )
-    datos_dict = datos._to_dict()
-    print("Variables del JSON: ",datos_dict.keys())
-    print("Cantidad de datos de precipitación descargados: ",len(datos_dict["precipitation"]))
-    print("FIN DEL PROCESO DE DESCARGA DE PREDICCIONES GFS de NOAA.")
+        forecasts_list.append(point_forecast.model_dump())
+    
+    final_data_dict = {
+    "id": f"{MODELO}_{download_time}",
+    "dateIssued": download_time,
+    "forecasts": forecasts_list  # Lista de diccionarios de pronósticos
+    }
+
+    # 4. Guardar el archivo (lógica de Airflow)
+    os.makedirs(DATA_DIR, exist_ok=True)
+    print("💾 Guardando datos en archivo JSON en ", DATA_DIR)
+    filename = f"{MODELO}_{download_time.replace(':', '-')}.json"
+    file_path = os.path.join(DATA_DIR, filename)
+
+    with open(file_path, 'w') as f:
+        json.dump(final_data_dict, f, indent=4,default=json_serial)
+
+    print(f"Datos del modelo {MODELO} descargados correctamente.")
     print("\n FIN")
 
 with DAG(

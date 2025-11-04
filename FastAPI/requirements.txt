@@ -4,3 +4,4 @@ xarray
 netCDF4
 pandas
 routers
+pydantic

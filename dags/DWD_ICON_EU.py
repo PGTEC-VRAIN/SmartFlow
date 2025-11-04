@@ -1,5 +1,5 @@
 # ============================================================
-# 🛰️ Open-Meteo Data Collector
+# 🛰️ Open-Meteo Data Collector from Public API Open-Meteo
 # ============================================================
 
 import json
@@ -27,7 +27,13 @@ default_args = {
     'retry_delay': timedelta(minutes=10),
 }
 # Configuración del endpoint y parámetros
-API_URL = "http://openmeteo-api:8080/v1/forecast" #"http://127.0.0.1:8080/v1/forecast"
+API_URL = "https://api.open-meteo.com/v1/forecast" # URL PUBLICA ||| #"http://openmeteo-api:8080/v1/forecast" # URL interna de Docker
+
+def json_serial(obj):
+    """Convierte objetos datetime a string ISO 8601."""
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
 
 def sacar_limite_CV(file_path: str):
     # 1. Cargar el GeoJSON
@@ -57,14 +63,10 @@ def sacar_limite_CV(file_path: str):
     return lats_in, lons_in
 
 # Carpeta donde guardar los datos (CSV temporal)
-DATA_DIR = Path("data")
+DATA_DIR = Path("FastAPI/data")
 DATA_DIR.mkdir(exist_ok=True)
-MODELO = "dwd_icon_eu"#"gfs_global" #"meteofrance_arpege_europe" #"ecmwf_ifs"
+MODELO = "dwd_icon_eu"#"dwd_icon_eu"#"gfs_global" #"meteofrance_arpege_europe" #"ecmwf_ifs"
 VARIABLES = ["temperature_2m","precipitation"]
-# now = datetime.now()  # o .utcnow() si quieres UTC
-# filename = now.strftime("%Y%m%d_%H%M") +"_"+ MODELO+".csv"
-# DATA_FILE = DATA_DIR / filename
-
 
 def fetch_forecast(lats, lons):
     """
@@ -80,9 +82,8 @@ def fetch_forecast(lats, lons):
     # Fecha de descarga para el metadato (ahora se calcula antes de los loops)
     download_time = datetime.now(dt.UTC).isoformat() 
     
-    variables_str = ",".join(VARIABLES)
-    start_date = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
-    end_date = (datetime.now() + timedelta(days=5)).strftime('%Y-%m-%d')
+    #start_date = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+    #end_date = (datetime.now() + timedelta(days=5)).strftime('%Y-%m-%d')
     
     # Variables de seguimiento de progreso
     i = 0 
@@ -97,9 +98,9 @@ def fetch_forecast(lats, lons):
                 "latitude": lat,
                 "longitude": lon,
                 "models": MODELO,
-                "hourly": variables_str, # <--- Se piden TODAS las variables aquí
-                "start_date": start_date,
-                "end_date": end_date
+                "hourly": VARIABLES, # <--- Se piden TODAS las variables aquí
+                #"start_date": start_date,
+                #"end_date": end_date
             }
             
             try:
@@ -110,7 +111,6 @@ def fetch_forecast(lats, lons):
                 r.raise_for_status()
                 data = r.json()
                 hourly_data = data.get("hourly", {})
-                
                 # 2. Validación de Datos (Comprobamos la variable de tiempo)
                 if not hourly_data or "time" not in hourly_data or not hourly_data["time"]:
                     print(f"⚠️ No se obtuvieron datos de tiempo para lat={lat:.2f}, lon={lon:.2f}.")
@@ -165,19 +165,11 @@ def fetch_forecast(lats, lons):
         return pd.DataFrame(), download_time
 
 
-# def append_forecast(df):
-#     """Guarda los datos en CSV (append si ya existe)"""
-#     print(f"💾 Guardando datos en {DATA_FILE} ...")
-#     if DATA_FILE.exists() and df.shape[0]>0:
-#         old_df = pd.read_csv(DATA_FILE, parse_dates=["time", "downloaded_at"])
-#         df = pd.concat([old_df, df]).drop_duplicates(subset=["time"]).reset_index(drop=True)
-#     df.to_csv(DATA_FILE, index=False)
-#     return df 
-
 def ejecutar_descarga_dwd():
     lats, lons = sacar_limite_CV("/opt/airflow/data/F162C175_Demarcacion.geojson")
 
     df, download_time = fetch_forecast(lats, lons)
+    #print(df["temperature_2m"].head())
 
     grouped = df.groupby(['latitude', 'longitude'])
         
@@ -185,16 +177,20 @@ def ejecutar_descarga_dwd():
         
     # 2. Iterar sobre cada grupo y crear objetos WeatherForecastSeries
     for (lat, lon), group_df in grouped:
+    
         point_forecast = WeatherForecastSeries(
+            id = f"{MODELO}_{lat}_{lon}_{download_time}",
+            dateIssued=download_time,
             lat=lat,
             lon=lon,
-            timestamp = group_df["time"].tolist(),
-            precipitation = group_df["precipitation"].to_list(),
-            temperature = group_df["temperature_2m"].to_list()
+            timestamp = group_df["time"].dropna().tolist(),
+            precipitation = group_df["precipitation"].dropna().to_list(),
+            temperature = group_df["temperature_2m"].dropna().to_list()
         )
+
         # Convertir el objeto Pydantic a un diccionario de Python
         forecasts_list.append(point_forecast.model_dump()) # Usamos model_dump() (o .dict() si es Pydantic v1)
-    print(point_forecast)
+    # print(point_forecast)
     # 3. Crear el Diccionario Contenedor Final
     # Este objeto NO necesita ser una clase Pydantic si solo se usa para guardar en disco
     final_data_dict = {
@@ -210,7 +206,7 @@ def ejecutar_descarga_dwd():
     file_path = os.path.join(DATA_DIR, filename)
 
     with open(file_path, 'w') as f:
-        json.dump(final_data_dict, f, indent=4)
+        json.dump(final_data_dict, f, indent=4,default=json_serial)
 
     print(f"Total de puntos de pronóstico guardados: {len(forecasts_list)}")
     print("FIN DEL PROCESO DE DESCARGA DE PREDICCIONES ICON_EU DE DWD.")

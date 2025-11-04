@@ -82,6 +82,7 @@ x-airflow-common:
     - ${AIRFLOW_PROJ_DIR:-.}/scripts:/opt/airflow/scripts
     - ${AIRFLOW_PROJ_DIR:-.}/SmartDataModels:/opt/airflow/libs/SmartDataModels
     - ${AIRFLOW_PROJ_DIR:-.}/data:/opt/airflow/data
+    - ${AIRFLOW_PROJ_DIR:-.}/FastAPI:/opt/airflow/FastAPI
     #- /var/run/docker.sock:/var/run/docker.sock #para ejecutar comandos docker dentro de los scripts py
     #- ./.cdsapirc:/home/airflow/.cdsapirc
   user: "${AIRFLOW_UID:-1000}:0"
@@ -338,14 +339,32 @@ services:
       airflow-init:
         condition: service_completed_successfully
 
-  openmeteo-api:
-    image: ghcr.io/open-meteo/open-meteo:latest
-    container_name: openmeteo_api
-    restart: always
-    # Opcional: Montar un volumen si la API necesita persistir datos o cache
-    volumes:
-      - openmeteo-data:/app/data  
+  # openmeteo-sync: # Nuevo servicio para descargar datos
+  #     image: ghcr.io/open-meteo/open-meteo:latest
+  #     container_name: openmeteo_sync
+  #     # El comando de sincronización que necesitas
+  #     # Necesitas saber el nombre exacto del modelo ICON_EU en la API
+  #     # Probaremos con 'dwd_icon_eu' o 'icon_eu' y las variables que necesitas.
+  #     command: sync dwd_icon_eu temperature_2m precipitation wind_speed_10m
+  #     volumes:
+  #       - openmeteo-data:/app/data # Monta el volumen para guardar los datos
+  #     profiles:
+  #       - sync # Para que solo se ejecute cuando lo pidas
+  #     # Es importante que el contenedor salga exitosamente una vez que sincronice
+
+  # openmeteo-api:
+  #   image: ghcr.io/open-meteo/open-meteo:latest
+  #   container_name: openmeteo_api
+  #   restart: always
+  #   ports:
+  #     - "8080:8080"
+  #   volumes:
+  #     - openmeteo-data:/app/data # Monta el data volume para leer los datos
+  #   # Aseguramos que la API no inicie hasta que los datos sean sincronizados
+  #   depends_on:
+  #     openmeteo-sync:
+  #       condition: service_completed_successfully # Importante!
 
 volumes:
   postgres-db-volume:
-  openmeteo-data:
+  #openmeteo-data:

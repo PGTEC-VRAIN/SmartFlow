@@ -6,7 +6,7 @@ import os
 import json
 from functools import lru_cache
 from SmartDataModels.WeatherForecastSeries import WeatherForecastSeries
-
+import math
 # Crea una instancia del Router
 router = APIRouter(
     prefix="/DWD_ICON",  # Todas las rutas aquí comenzarán con /DWD_ICON
@@ -15,20 +15,14 @@ router = APIRouter(
 
 # Define la ruta base donde Airflow guarda los archivos
 # (Asegúrate de que esta ruta esté montada en Docker)
-DATA_DIR = "./data" 
-MODELO = "DWD_ICON"
-# ... [Definición del router] ...
-router = APIRouter(
-    prefix="/DWD_ICON",
-    tags=["DWD ICON"]
-)
+DATA_DIR = "/app/data_files" 
+MODELO = "dwd_icon"
+
 # ... [Definición de find_latest_json] ...
 def find_latest_json_path(directory_path: str, filename_pattern: str) -> str:
     """Encuentra la ruta completa al archivo JSON más reciente."""
     
-    search_pattern = os.path.join(directory_path, filename_pattern)
-    # Cambiamos la extensión a .json
-    search_pattern = search_pattern.replace(".csv", ".json") 
+    search_pattern = os.path.join(directory_path, f"{filename_pattern}*.json")
     list_of_files = glob.glob(search_pattern)
     
     if not list_of_files:
@@ -46,8 +40,7 @@ def get_cached_forecast_data() -> Dict[str, Any]:
     Dependencia que carga y valida el archivo JSON más reciente.
     Retorna el diccionario completo, incluyendo los metadatos y la lista de objetos PointForecast validados.
     """
-    latest_file_path = find_latest_json_path(DATA_DIR, f"{MODELO}_*.json")
-    
+    latest_file_path = find_latest_json_path(DATA_DIR, MODELO)
     try:
         with open(latest_file_path, 'r') as f:
             full_data = json.load(f)
@@ -81,26 +74,56 @@ async def get_dwd_icon_data(
     # Usamos la dependencia para obtener los datos
     data: Dict[str, Any] = Depends(get_cached_forecast_data),
     # Parámetros de consulta
-    lat: float = Query(..., description="Latitud exacta del punto a consultar."),
-    lon: float = Query(..., description="Longitud exacta del punto a consultar."),
-    # El parámetro 'date' ya no es necesario si siempre se busca el 'latest'
-    # date: Optional[str] = "latest" 
+    lat: float = Query(..., description="Latitud del punto a consultar. Se interpola si la coordenada no está disponible"),
+    lon: float = Query(..., description="Longitud del punto a consultar.Se interpola si la coordenada no está disponible"),
 ):
-
+    
     # Extraemos la lista de objetos WeatherForecastSeries validados
     collection_forecasts: List[WeatherForecastSeries] = data["forecasts"]
 
-    # Buscamos el punto exacto
+    # 1. Búsqueda por Coincidencia Exacta
+    # Usamos una tolerancia mínima para errores de coma flotante
+    TOLERANCE = 0.0001 
+    
     filtered_forecasts = [
         point for point in collection_forecasts 
-        if abs(point.lat - lat) < 0.0001 and abs(point.lon - lon) < 0.0001
+        if abs(point.lat - lat) < TOLERANCE and abs(point.lon - lon) < TOLERANCE
     ]
     
-    if not filtered_forecasts:
-        raise HTTPException(
-            status_code=404,
-            detail=f"No se encontró pronóstico para la coordenada lat={lat}, lon={lon}."
-        )
-            
-    # Devolvemos la lista (que contendrá 0 o 1 elemento)
-    return filtered_forecasts
+    if filtered_forecasts:
+        # Se encontró el punto exacto o uno muy cercano
+        return filtered_forecasts
+    
+    # --- 2. Lógica del Vecino Más Cercano (Nearest Neighbor) ---
+
+    # Si no hay coincidencia exacta, buscamos el punto más cercano
+    
+    # Inicialización con una distancia imposiblemente grande
+    min_distance_sq = float('inf')
+    closest_point = None
+
+    for point in collection_forecasts:
+        # Calculamos la distancia euclidiana al cuadrado para evitar la costosa raíz cuadrada
+        # Distancia = (lat_modelo - lat_consulta)^2 + (lon_modelo - lon_consulta)^2
+        distance_sq = (point.lat - lat)**2 + (point.lon - lon)**2
+        
+        if distance_sq < min_distance_sq:
+            min_distance_sq = distance_sq
+            closest_point = point
+
+    if closest_point:
+        # Si encontramos el punto más cercano, lo devolvemos
+        
+        # Opcional: Puedes calcular la distancia real (en grados) para el mensaje
+        min_distance = math.sqrt(min_distance_sq)
+        
+        print(f"Punto exacto no encontrado. Devolviendo el más cercano en lat={closest_point.lat}, lon={closest_point.lon}. Distancia: {min_distance:.4f} grados.")
+        
+        # Devolvemos el punto más cercano en una lista (para mantener la consistencia del endpoint)
+        return [closest_point]
+    
+    # Si la colección de pronósticos está vacía (nunca debería pasar si get_cached_forecast_data funciona)
+    raise HTTPException(
+        status_code=404,
+        detail=f"No hay datos de pronóstico disponibles para el modelo DWD ICON."
+    )

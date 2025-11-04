@@ -8,3 +8,4 @@ docker
 cdsapi
 xarray
 netCDF4
+pydantic
