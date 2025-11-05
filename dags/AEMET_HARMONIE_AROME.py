@@ -17,6 +17,7 @@ import datetime as dt
 from airflow import DAG
 from datetime import datetime, timedelta
 from airflow.operators.python import PythonOperator
+import shutil
 
 # --- CONFIGURACIÓN BÁSICA DEL DAG ---
 default_args = {
@@ -29,7 +30,8 @@ default_args = {
 }
 
 # Carpeta de datos
-data_path = "./Datos/HARMONIE/"
+DATA_PATH = "FastAPI/data/HARMONIE/"
+MODELO = "HARMONIE_AROME"
 
 # Diccionario de variables y sufijos de archivo
 variables_sufijos = {
@@ -65,7 +67,7 @@ def download_harmonie_pb(output_dir):
             os.remove(os.path.join(output_dir, f))
 
     os.makedirs(output_dir, exist_ok=True)
- 
+
     print("📡 Descargando datos desde AEMET...")
     response = requests.get(url, timeout=60)
     print(response.status_code, response.headers.get("content-type"))
@@ -92,7 +94,7 @@ def download_harmonie_pb(output_dir):
 
 def tif_to_dataframe_realvalues(filepath, variable):
     """
-    Convierte un archivo GeoTIFF RGBA (procedente de AEMET HARMONIE) en un DataFrame 
+    Convierte un archivo GeoTIFF RGBA (procedente de AEMET HARMONIE) en un DataFrame
     con coordenadas, timestamp y valores físicos (temperatura, viento, precipitación, etc.).
 
     La función interpreta la paleta de colores contenida en los metadatos `ESCALA`
@@ -116,7 +118,7 @@ def tif_to_dataframe_realvalues(filepath, variable):
             - timestamp : fecha/hora obtenida del nombre del archivo
             - variable : nombre de la variable correspondiente
     """
-    
+
     with rasterio.open(filepath) as src:
         # Leer array RGBA (4 bandas)
         if src.count < 4:
@@ -128,7 +130,7 @@ def tif_to_dataframe_realvalues(filepath, variable):
         escala_str = tags.get('ESCALA')
         if not escala_str:
             raise ValueError(f"No se encontró ESCALA en metadatos de {filepath}")
-        
+
         escala_dict = json.loads(escala_str.replace("'", '"'))
         alto, ancho, _  = imagen_rgba.shape
 
@@ -138,18 +140,18 @@ def tif_to_dataframe_realvalues(filepath, variable):
         # 1. Extraer Temperatura Máxima
         # Convertir a flotante, ignorando el string vacío '' (si existe)
         valores_numericos = [float(v) for v in entry["Valores"] if v != '']
-        
+
         # Si hay valores, T_max es el máximo del intervalo.
         if valores_numericos:
             T_max = max(valores_numericos)
         else:
             # Manejar el caso si 'Valores' es ['',''] (improbable, pero seguro)
-            continue 
-        
+            continue
+
         # 2. Extraer R, G, B
         # El cuarto valor es 'A' (Alpha), que generalmente es 255.
         R, G, B = [int(c) for c in entry["RGBA"][:3]]
-        
+
         # 3. Construir el punto clave [T_max, R, G, B]
         puntos_clave_list.append([T_max, R, G, B])
 
@@ -190,7 +192,7 @@ def tif_to_dataframe_realvalues(filepath, variable):
 
     # Casos especiales: Si la distancia es casi cero (coincidencia exacta), evita división por cero
     denominador = d_P1 + d_P2
-    denominador[denominador == 0] = 1e-9 
+    denominador[denominador == 0] = 1e-9
 
     # Cálculo de alfa y la temperatura interpolada
     # Asumimos que T_P1 < T_P2, si no, es (T_P2 - T_P1) * (d_P1 / denominador) + T_P1
@@ -227,7 +229,7 @@ def tif_to_dataframe_realvalues(filepath, variable):
         "timestamp": timestamp,
         "variable": variable
     })
-        
+
     return df
 
 def pivotar_y_recortar_datos_a_comunidad_valenciana(df):
@@ -254,7 +256,7 @@ def pivotar_y_recortar_datos_a_comunidad_valenciana(df):
     ).reset_index()
 
     df_wide.columns.name = None #quitar multi index del nombre de las columnas
-    
+
     ### 2º: RECORTE
     cv_bounds = {
         "lat_min": 38.0,
@@ -270,37 +272,66 @@ def pivotar_y_recortar_datos_a_comunidad_valenciana(df):
     ]
     return df_recortado
 
+def json_serial(obj):
+    """Convierte objetos datetime a string ISO 8601."""
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
+
 def ejecutar_descarga_aemet():
-    _ ,download_time = download_harmonie_pb("./Datos/HARMONIE")
+    _ ,download_time = download_harmonie_pb(DATA_PATH)
 
     dfs = []
     for var, suf in variables_sufijos.items():
-        print(f"Buscando archivos en {data_path} con sufijo {suf} para la variable {var}...")
-        archivos_encontrados = sorted(glob.glob(f"{data_path}/*{suf}"))
+        print(f"Buscando archivos en {DATA_PATH} con sufijo {suf} para la variable {var}...")
+        archivos_encontrados = sorted(glob.glob(f"{DATA_PATH}/*{suf}"))
         print(f"Archivos encontrados: {len(archivos_encontrados)}")
-        for f in sorted(glob.glob(f"{data_path}/*{suf}")):
+        for f in sorted(glob.glob(f"{DATA_PATH}/*{suf}")):
             dfs.append(tif_to_dataframe_realvalues(f, var))
 
 
     df_final = pd.concat(dfs, ignore_index=True)
 
     df_cv = pivotar_y_recortar_datos_a_comunidad_valenciana(df_final)
- 
-    df_cv["timestamp"] = df_cv["timestamp"].astype(str)
 
-    datos = WeatherForecastSeries(
-        id="Harmonie-Arome_AEMET_CV_001",
+    df_cv["timestamp"] = df_cv["timestamp"].astype(str)
+    print(df_cv.shape)
+    grouped = df_cv.groupby(['lat', 'lon'])
+    print(len(grouped))
+    forecasts_list = []
+
+    # 2. Iterar sobre cada grupo y crear objetos WeatherForecastSeries
+    for (lat, lon), group_df in grouped:
+        point_forecast = WeatherForecastSeries(
+        id= MODELO + "_" + download_time,
         dateIssued=download_time,
-        timestamp = df_cv["timestamp"].tolist(),
-        lat = df_cv["lat"].tolist(),
-        lon = df_cv["lon"].tolist(),
-        precipitation = df_cv["prec_1h"].to_list(),
-        windSpeed = df_cv["viento"].to_list()
-    )
-    datos_dict = datos._to_dict()
-    print("Variables del JSON: ",datos_dict.keys())
-    print("Cantidad de datos de termperatura descargados: ",len(datos_dict["precipitation"]))
-    print("FIN DEL PROCESO DE DESCARGA DE PREDICCIONES HARMONIE-AROME DE AEMET.")
+        lat=lat,
+        lon=lon,
+        timestamp = group_df["timestamp"].tolist(),
+        precipitation = group_df["prec_1h"].to_list(),
+        temperature = group_df["temperatura"].to_list(),
+        windSpeed = group_df["viento"].to_list(),
+)
+        forecasts_list.append(point_forecast.model_dump())
+    print("FIN BUCLE")
+    final_data_dict = {
+    "id": f"{MODELO}_{download_time}",
+    "dateIssued": download_time,
+    "forecasts": forecasts_list  # Lista de diccionarios de pronósticos
+    }
+
+    # 4. Guardar el archivo (lógica de Airflow)
+    shutil.rmtree(DATA_PATH) # borramos primero el directorio con archivos RAW
+    os.makedirs(DATA_PATH, exist_ok=True)  # creamos de nuevo el directorio para almacenar archivos limpios
+    print("💾 Guardando datos en archivo JSON en ", DATA_PATH)
+    filename = f"{MODELO}_{download_time.replace(':', '-')}.json"
+    file_path = os.path.join(DATA_PATH, filename)
+
+    with open(file_path, 'w') as f:
+        json.dump(final_data_dict, f, indent=4,default=json_serial)
+
+    print(f"Datos del modelo {MODELO} descargados correctamente.")
+    print("\n FIN")
 
 
 with DAG(
@@ -312,7 +343,7 @@ with DAG(
     catchup=False,
     tags=['aemet', 'harmonie', 'meteorología', 'arome'],
 ) as dag:
-    
+
     # 1. Tarea para ejecutar el procesamiento y descarga
     procesar_aemet_harmonie = PythonOperator(
         task_id='procesar_aemet_harmonie',

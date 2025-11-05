@@ -13,6 +13,9 @@ from datetime import datetime, timedelta
 import datetime as dt
 import logging
 import xarray as xr
+import os
+import json
+import zipfile
 
 # Configuración básica para el logger (necesario dentro de un operador)
 log = logging.getLogger(__name__)
@@ -26,8 +29,8 @@ default_args = {
     'retries': 1,
     'retry_delay': timedelta(minutes=10),
 }
-DATAPATH = Path("./data/EFFIS")
-DATAPATH.mkdir(exist_ok=True)
+DATA_DIR = "FastAPI/data/EFFIS"
+MODELO = "EFFIS"
 
 def ejecutar_descarga_EFFIS():
     """
@@ -83,28 +86,85 @@ def ejecutar_descarga_EFFIS():
     log.info(f"Descargando datos de EFFIS para la fecha dinámica: {year_str}-{month_str}-{day_str}")
     return file, download_time
 
-def procesar_EFFIS():
-    file, download_time = ejecutar_descarga_EFFIS()
+def json_serial(obj):
+    """Convierte objetos datetime a string ISO 8601."""
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
 
-    df = xr.open_dataset(file, engine="netcdf4").to_dataframe().reset_index()
-    print(df.tail())
+
+def procesar_effis():
+    zip_path, download_time = ejecutar_descarga_EFFIS()
+    print(f"📦 ZIP descargado: {zip_path}")
+
+    # 📂 Carpeta donde se descomprime (mismo directorio)
+    extract_dir = DATA_DIR
+
+    # 🔓 Descomprimir directamente
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        # Mostrar contenido
+        print("Contenido del ZIP:")
+        for name in zip_ref.namelist():
+            print(" -", name)
+        # Extraer todo (solo un .nc)
+        zip_ref.extractall(extract_dir)
+
+    # 🔍 Buscar el archivo .nc recién extraído
+    nc_file = next(
+        (os.path.join(extract_dir, f)
+         for f in os.listdir(extract_dir)
+         if f.endswith(".nc")),
+        None
+    )
+
+    if nc_file is None:
+        raise FileNotFoundError(f"No se encontró ningún archivo .nc dentro de {zip_path}")
+
+    print(f"✅ Archivo NetCDF encontrado: {nc_file}")
+
+    df = xr.open_dataset(nc_file, engine="netcdf4").to_dataframe().reset_index()
+    print(df.head())
     print(df.columns)
     
+    df.to_csv(f"FastAPI/data/EFFIS/PrediccionesEFFIS_{download_time}.csv")
 
-    df["valid_time"] = df["valid_time"].astype(str)
+    # df["valid_time"] = df["valid_time"].astype(str) 
+    # grouped = df.groupby(["lat", "lon"])
 
-    datos = WeatherForecastSeries(
-        id="EFFIS_" + download_time,
-        dateIssued=download_time,
-        timestamp = df["valid_time"].tolist(),
-        lat = df["latitude"].tolist(),
-        lon = df["longitude"].tolist(),
-        fireWeatherIndex = df["daily_fire_weather_index"].to_list(),
-    )
-    datos_dict = datos._to_dict()
-    print("Variables del JSON: ",datos_dict.keys())
-    print("Cantidad de datos de riesgo de incendios descargados: ",datos_dict)
-    print("FIN DEL PROCESO DE DESCARGA DE PREDICCIONES DE EFFIS.")
+    # forecasts_list = []
+
+    # for (lat, lon), group_df in grouped:
+    #     daily_fire_weather_index = group_df["daily_fire_weather_index"].dropna().tolist()
+
+    #     # 👇 Saltar puntos sin datos
+    #     if not river_discharge:
+    #         continue
+
+    #     point_forecast = WeatherForecastSeries(
+    #         id=f"{MODELO}_{lat}_{lon}_{download_time}",
+    #         dateIssued=download_time,
+    #         lat=lat,
+    #         lon=lon,
+    #         timestamp=group_df["valid_time"].dropna().tolist(),
+    #         fireWeatherIndex=daily_fire_weather_index,
+    #     )
+    #     forecasts_list.append(point_forecast.model_dump())
+
+    # final_data_dict = {
+    #     "id": f"{MODELO}_{download_time}",
+    #     "dateIssued": download_time,
+    #     "forecasts": forecasts_list,  
+    # }
+
+    # os.makedirs(DATA_DIR, exist_ok=True)
+    # filename = f"{MODELO}_{download_time.replace(':', '-')}.json"
+    # file_path = os.path.join(DATA_DIR, filename)
+
+    # with open(file_path, "w") as f:
+    #     json.dump(final_data_dict, f, indent=4, default=json_serial)
+
+    print(f"Datos del modelo {MODELO} descargados correctamente ({len(forecasts_list)} puntos guardados).")
+    print("\n FIN")
 
 
 with DAG(
@@ -120,6 +180,6 @@ with DAG(
     # La clave es usar op_kwargs para inyectar el macro de Airflow
     EFFIS = PythonOperator(
         task_id='Procesar_EFFIS_Forecast',
-        python_callable=procesar_EFFIS,
+        python_callable=procesar_effis,
     )
     EFFIS

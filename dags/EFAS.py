@@ -13,6 +13,11 @@ from datetime import datetime, timedelta
 import datetime as dt
 import logging
 import xarray as xr
+import os
+import json
+
+MODELO = "EFAS"
+DATA_DIR = "FastAPI/data/EFAS"
 
 # Configuración básica para el logger (necesario dentro de un operador)
 log = logging.getLogger(__name__)
@@ -26,8 +31,6 @@ default_args = {
     'retries': 1,
     'retry_delay': timedelta(minutes=10),
 }
-DATAPATH = Path("./data/EFAS")
-DATAPATH.mkdir(exist_ok=True)
 
 def ejecutar_descarga_EFAS():
     """
@@ -35,11 +38,7 @@ def ejecutar_descarga_EFAS():
     ahora recibiendo la fecha de destino.
     """
     
-    # Airflow ya se encarga de calcular el salto de mes/año con {{ tomorrow_ds }}
-    # Aquí puedes construir el diccionario de request como hicimos antes, 
-    # pero ahora dentro de la función callable.
-
-    target_date = datetime.today() - timedelta(days=31)
+    target_date = datetime.today() - timedelta(days=31) # descargamos datos de un mes antes ya que son los últimos datos gratis
     print(target_date)
     
     year_str = str(target_date.year)
@@ -138,27 +137,54 @@ def ejecutar_descarga_EFAS():
     log.info(f"Descargando datos de EFAS para la fecha dinámica: {year_str}-{month_str}-{day_str}")
     return file, download_time
 
-def procesar_EFAS():
-    file, download_time = ejecutar_descarga_EFAS()
+def json_serial(obj):
+    """Convierte objetos datetime a string ISO 8601."""
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
 
+
+def procesar_efas():
+    file, download_time = ejecutar_descarga_EFAS()
     df = xr.open_dataset(file, engine="netcdf4").to_dataframe().reset_index()
 
-    df["valid_time"] = df["valid_time"].astype(str)
-    print("CANTIDAD DE DATOS DESCARGADOS DE EFAS: ",len(df))
-    print(df.head())
-    
-    datos = WeatherForecastSeries(
-        id="EFAS_" + download_time,
-        dateIssued=download_time,
-        timestamp = df["valid_time"].tolist(),
-        lat = df["latitude"].tolist(),
-        lon = df["longitude"].tolist(),
-        riverDischarge = df["dis06"].to_list(),
-    )
-    datos_dict = datos._to_dict()
-    print("Variables del JSON: ",datos_dict.keys())
-    print("FIN DEL PROCESO DE DESCARGA DE PREDICCIONES DE EFAS.")
+    df["valid_time"] = df["valid_time"].astype(str) 
+    grouped = df.groupby(["latitude", "longitude"])
 
+    forecasts_list = []
+
+    for (lat, lon), group_df in grouped:
+        river_discharge = group_df["dis06"].dropna().tolist()
+
+        # 👇 Saltar puntos sin datos
+        if not river_discharge:
+            continue
+
+        point_forecast = WeatherForecastSeries(
+            id=f"{MODELO}_{lat}_{lon}_{download_time}",
+            dateIssued=download_time,
+            lat=lat,
+            lon=lon,
+            timestamp=group_df["valid_time"].dropna().tolist(),
+            riverDischarge=river_discharge,
+        )
+        forecasts_list.append(point_forecast.model_dump())
+
+    final_data_dict = {
+        "id": f"{MODELO}_{download_time}",
+        "dateIssued": download_time,
+        "forecasts": forecasts_list,
+    }
+
+    os.makedirs(DATA_DIR, exist_ok=True)
+    filename = f"{MODELO}_{download_time.replace(':', '-')}.json"
+    file_path = os.path.join(DATA_DIR, filename)
+
+    with open(file_path, "w") as f:
+        json.dump(final_data_dict, f, indent=4, default=json_serial)
+
+    print(f"Datos del modelo {MODELO} descargados correctamente ({len(forecasts_list)} puntos guardados).")
+    print("\n FIN")
 
 with DAG(
     dag_id='EFAS_Forecast_Copernicus_EWDS',
@@ -173,6 +199,6 @@ with DAG(
     # La clave es usar op_kwargs para inyectar el macro de Airflow
     EFAS = PythonOperator(
         task_id='Procesar_EFAS_Forecast',
-        python_callable=procesar_EFAS,
+        python_callable=procesar_efas,
     )
     EFAS

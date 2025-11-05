@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from Scripts import DWD_ICON, ARPEGE, GFS_NOAA,AIFS_ECMWF,GEPS_ENS_CNC,IFS9km_ECMWF,Seas5_ECMWF_copernicus
+from Scripts import DWD_ICON, ARPEGE, GFS_NOAA,AIFS_ECMWF,GEPS_ENS_CNC,IFS9km_ECMWF,Seas5_ECMWF_copernicus,AEMET,EFAS
 
 app = FastAPI(
     title="SmartFlow Global API",
@@ -16,9 +16,9 @@ app.include_router(AIFS_ECMWF.router)
 app.include_router(GEPS_ENS_CNC.router)
 app.include_router(IFS9km_ECMWF.router)
 app.include_router(Seas5_ECMWF_copernicus.router)
-# app.include_router(EFAS.router)
+app.include_router(EFAS.router)
 # app.include_router(EFFIS.router)
-# app.include_router(AEMET.router)
+app.include_router(AEMET.router)
 
 
 @app.get("/")
