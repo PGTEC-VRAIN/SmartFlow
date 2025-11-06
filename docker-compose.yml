@@ -81,8 +81,8 @@ x-airflow-common:
     - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
     - ${AIRFLOW_PROJ_DIR:-.}/scripts:/opt/airflow/scripts
     - ${AIRFLOW_PROJ_DIR:-.}/SmartDataModels:/opt/airflow/libs/SmartDataModels
-    - ${AIRFLOW_PROJ_DIR:-.}/data:/opt/airflow/data
-    - ${AIRFLOW_PROJ_DIR:-.}/FastAPI:/opt/airflow/FastAPI
+    - ${AIRFLOW_PROJ_DIR:-.}/SmartFlowAPI/data:/opt/airflow/data
+    #- ${AIRFLOW_PROJ_DIR:-.}/FastAPI:/opt/airflow/FastAPI
     #- /var/run/docker.sock:/var/run/docker.sock #para ejecutar comandos docker dentro de los scripts py
     #- ./.cdsapirc:/home/airflow/.cdsapirc
   user: "${AIRFLOW_UID:-1000}:0"

@@ -15,3 +15,5 @@ services:
     volumes:
       - ./data:/app/data_files
     # Nota: Si usas volúmenes, ajusta el path de xr.open_dataset() a /app/data_files/archivo.nc
+    environment:
+      - DATA_DIR=/app/data_files
