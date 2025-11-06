@@ -29,7 +29,7 @@ default_args = {
     'retries': 1,
     'retry_delay': timedelta(minutes=10),
 }
-DATA_DIR = "FastAPI/data/EFFIS"
+DATA_DIR = "SmartFlowAPI/data/EFFIS/"
 MODELO = "EFFIS"
 
 def ejecutar_descarga_EFFIS():

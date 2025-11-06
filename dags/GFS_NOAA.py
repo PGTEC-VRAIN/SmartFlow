@@ -20,7 +20,7 @@ import os, json
 
 
 # Carpeta donde guardar los datos JSON
-DATA_DIR = Path("FastAPI/data")
+DATA_DIR = Path("SmartFlowAPI/data/GFS/")
 DATA_DIR.mkdir(exist_ok=True)
 MODELO = "ncep_gfs013"#"gfs_global" #"meteofrance_arpege_europe" #"ecmwf_ifs"
 VARIABLES = ["temperature_2m","precipitation","wind_speed_10m","shortwave_radiation"]

@@ -63,7 +63,7 @@ def sacar_limite_CV(file_path: str):
     return lats_in, lons_in
 
 # Carpeta donde guardar los datos (CSV temporal)
-DATA_DIR = Path("FastAPI/data")
+DATA_DIR = Path("SmartFlowAPI/data/DWD_ICON/")
 DATA_DIR.mkdir(exist_ok=True)
 MODELO = "dwd_icon_eu"#"dwd_icon_eu"#"gfs_global" #"meteofrance_arpege_europe" #"ecmwf_ifs"
 VARIABLES = ["temperature_2m","precipitation"]

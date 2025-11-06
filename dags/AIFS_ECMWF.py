@@ -20,7 +20,7 @@ import json
 
 # --- CONFIGURACIÓN BÁSICA DEL DAG ---
 
-DATA_DIR = Path("FastAPI/data")
+DATA_DIR = Path("SmartFlowAPI/data/AIFS/")
 DATA_DIR.mkdir(exist_ok=True)
 MODELO = "ecmwf_aifs025"#"gfs_global" #"meteofrance_arpege_europe" #"ecmwf_ifs"
 VARIABLES = ["temperature_2m","precipitation","wind_speed_10m"]

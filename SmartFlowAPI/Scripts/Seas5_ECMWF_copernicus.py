@@ -9,14 +9,14 @@ from SmartDataModels.WeatherForecastSeries import WeatherForecastSeries
 import math
 # Crea una instancia del Router
 router = APIRouter(
-    prefix="/ARPEGE",  # Todas las rutas aquí comenzarán con /ARPEGE
-    tags=["ARPEGE"] # Agrupa las rutas en Swagger UI
+    prefix="/SEAS5_ECMWF",  # Todas las rutas aquí comenzarán con /SEAS5_ECMWF
+    tags=["SEAS5_ECMWF"] # Agrupa las rutas en Swagger UI
 )
 
 # Define la ruta base donde Airflow guarda los archivos
 # (Asegúrate de que esta ruta esté montada en Docker)
-DATA_DIR = "/app/data_files" 
-MODELO = "meteofrance"
+DATA_DIR = "/app/data_files/SEAS5" 
+MODELO = "ecmwf_seas5"
 
 # ... [Definición de find_latest_json] ...
 def find_latest_json_path(directory_path: str, filename_pattern: str) -> str:
@@ -27,7 +27,7 @@ def find_latest_json_path(directory_path: str, filename_pattern: str) -> str:
     
     if not list_of_files:
         # Lanza un error HTTP 404 (o 503 si el servicio no está disponible)
-        raise HTTPException(status_code=503, detail=f"Datos del modelo ARPEGE no disponibles. No se encontraron archivos.")
+        raise HTTPException(status_code=503, detail=f"Datos del modelo SEAS5_ECMWF no disponibles. No se encontraron archivos.")
 
     # Encuentra el archivo más reciente por tiempo de modificación
     latest_file = max(list_of_files, key=os.path.getmtime)
@@ -70,7 +70,7 @@ def get_cached_forecast_data() -> Dict[str, Any]:
     response_model=List[WeatherForecastSeries], # La respuesta es una lista de pronósticos
     summary="Obtiene el pronóstico más reciente, filtrado por coordenadas."
 )
-async def get_arpege_data(
+async def get_SEAS5_ECMWF_data(
     # Usamos la dependencia para obtener los datos
     data: Dict[str, Any] = Depends(get_cached_forecast_data),
     # Parámetros de consulta

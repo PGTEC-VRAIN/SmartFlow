@@ -30,7 +30,7 @@ default_args = {
 }
 
 # Carpeta de datos
-DATA_PATH = "FastAPI/data/HARMONIE/"
+DATA_PATH = "SmartFlowAPI/data/HARMONIE/"
 MODELO = "HARMONIE_AROME"
 
 # Diccionario de variables y sufijos de archivo

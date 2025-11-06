@@ -17,7 +17,7 @@ import os
 import json
 
 MODELO = "EFAS"
-DATA_DIR = "FastAPI/data/EFAS"
+DATA_DIR = "SmartFlowAPI/data/EFAS/"
 
 # Configuración básica para el logger (necesario dentro de un operador)
 log = logging.getLogger(__name__)
