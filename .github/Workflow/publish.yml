@@ -1,0 +1,45 @@
+name: 🚀 Build & Publish SmartFlowAPI Image to GHCR
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'     # Se ejecuta cuando creas un tag tipo v1.0.0
+
+permissions:
+  contents: read
+  packages: write   # Permite subir imágenes al GHCR
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest  
+
+    steps:
+      - name: 🧩 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python (for completeness if needed)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 🔑 Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🏗️ Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./SmartFlowAPI
+          push: true
+          tags: |
+            ghcr.io/pgtec-vrain/smartflow-api:${{ github.ref_name }}
+            ghcr.io/pgtec-vrain/smartflow-api:latest
+      
+      - name: 🧾 Print image info
+        run: |
+          echo "✅ Image published to:"
+          echo "   ghcr.io/pgtec-vrain/smartflow-api:${{ github.ref_name }}"
+          echo "   ghcr.io/pgtec-vrain/smartflow-api:latest"
