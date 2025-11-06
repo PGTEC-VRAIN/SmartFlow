@@ -119,6 +119,10 @@ First, a screenshot that shows all the endpoints:
 
 <img src="images/Endpoints.png" alt="SmartFlowAPI Endpoints" width="700"/>
 
+</div>
+
+<div align="center">
+
 Request and response using FastAPI Swagger UI
 
 <img src="images/dwd_icon_request.png" alt="SmartFlowAPI Swagger DWD_ICON request" width="700"/>
