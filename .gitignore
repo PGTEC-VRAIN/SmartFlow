@@ -1,7 +1,7 @@
 /logs/
 *.log
 *.sqlite
-/SmartFlowAPI/data/
+/SmartFlowAPI/data/EFFIS/
 __pycache__/
 */__pycache__/
 **/__pycache__/
