@@ -34,12 +34,10 @@ jobs:
         with:
           context: ./SmartFlowAPI
           push: true
+          no-cache: true
           tags: |
             ghcr.io/pgtec-vrain/smartflow-api:${{ github.ref_name }}
             ghcr.io/pgtec-vrain/smartflow-api:latest
-
-                  - name: Build and push Docker image
-          no-cache: true
       
       - name: 🧾 Print image info
         run: |
