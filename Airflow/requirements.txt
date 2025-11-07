@@ -1,0 +1,11 @@
+pandas
+rasterio
+numpy
+requests
+geopandas
+shapely
+docker
+cdsapi
+xarray
+netCDF4
+pydantic

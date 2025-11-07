@@ -31,16 +31,16 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://pgtec.webs.upv.es/">
-    <img src="https://pgtec.webs.upv.es/images/logo_PGTEC.svg" alt="PGTEC Logo" width="80"/>
+  <a href="https://airflow.apache.org/">
+    <img src="Airflow/images/airflow.jpeg" alt="Airflow Logo" width="80"/>
   </a>
 
-  <h3 align="center">Smart data pipelines</h3>
+  <h3 align="center">Airflow</h3>
 
   <p align="center">
-    Repository containing Python scripts to ingest data from multiple sources, transform it into FIWARE Smart Data Models, and build Airflow DAGs to orchestrate automated data pipelines.
+    Repository containing Python scripts to ingest data from multiple climate models, transform it into FIWARE Smart Data Model WeatherForecastSeries, and build Airflow DAGs to orchestrate automated data pipelines.
     <br />
-    <a href="https://pgtec.webs.upv.es/"><strong>See the web page »</strong></a>
+    <a href="https://pgtec-vrain.github.io/welcome/"><strong>See the PGTEC web page »</strong></a>
     <br />
     <!--<br />
     <a href="https://github.com/othneildrew/Best-README-Template">View Demo</a>
@@ -84,19 +84,17 @@ This README provides an overview of the project’s purpose, setup instructions,
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-Its main objective is to describe and provide the infrastructure required to deploy a data space using <a href="https://www.fiware.org/">FIWARE</a> technology, offering a detailed and easy-to-follow guide for different environments.
+This repository is part of the tasks developed within the <a href="https://pgtec.webs.upv.en/">PGTEC</a> project. PGTEC aims to develop a platform for the prevention and management of climate emergencies, providing advanced tools for the collection, analysis, and modeling of environmental and climate data. This solution is integrated into interoperable data spaces, allowing public administrations, emergency management agencies, and climate sector companies to access real-time information for decision-making.
 
-This repository is part of the tasks developed within the <a href="https://pgtec.webs.upv.en/">PGTEC</a> project. Its main objective is to describe and provide the infrastructure required to deploy a data space using  <a href="https://www.fiware.org/">FIWARE</a> technologies, offering a detailed and easy-to-follow guide adaptable to different environments.
+The purpose of this repository is to provide an API that will use the TETIS model to request specific coordinate data from a specific meteorological model according to user specifications. Therefore, the API will contain updated data from different meteorological models ready to be provided to the TETIS model. To do this, the Docker environment has deployed the Airflow service with the aim of executing Python scripts that automatically download data from prediction models.
 
-The goal of PGTEC is to build a data platform that periodically retrieves historical and forecasted climate and weather data from multiple APIs, standardizes them using Smart Data Models, and stores them in a FIWARE Context Broker with historical persistence — enabling the development of machine learning and deep learning models.
+The repository can be splitted into two parts according to the services offered:
 
-This repository specifically contains the Python scripts used to:
+- Airflow: Service that downloads prediction data from different models and saves it in JSON format following the Smart Data Model <a href="https://github.com/PGTEC-VRAIN/SmartFlow/blob/main/SmartDataModels/WeatherForcastSeries/schema.json">Weather Forecast Series</a>. Currently, the data is stored in a local folder that the SmartFlowAPI accesses to obtain the data.
 
-- Retrieve data from multiple climate data sources such as AEMET, CHJ, Open-Meteo, and Copernicus.
+- SmartFlowAPI: Rest API that uses the TETIS model to obtain predictions for specific points and models according to the user.
 
-- Convert the raw data into FIWARE Smart Data Models to standardize the format.
-
-- The creation of automated Airflow DAGs for pipeline execution.
+The repository contains two different dockers, one for each service offered.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -136,141 +134,6 @@ To get a local copy up and running follow these simple steps in ubuntu command l
    ```sh
    docker compose up --build -d
    ```
-
-Here is a brief explanation of the Python scripts:
-
-- `AEMET_HARMONIE_AROME.py`: Python script that retrieves weather forecast data from the AEMET website and processes it programatically using airflow sintaxis
-
-  - **Data**: All the data is processed into a standardized format defined by the `WeatherForecastSeries.py` Smart Data Model. The variables we are currently using are:
-    - Temperature 
-    - Precipitation
-    - Wind Speed 
-
-  - **Raw Data**: The input data are GeoTIFF (.tif) files containing weather variables encoded as color values. Using a color scale provided by AEMET, the script converts these color codes (RGBA) into real physical values such as temperature, wind speed, and precipitation.
-
-  - **API Key**: No API key is required for execution as we are downloading public data from AEMET website.
-
-  - **Run script**: Run hourly to ensure the latest forecasts are always retrieved and processed.
- 
-All the following scripts retrieve data from OpenMeteo API:
-
-- `AIFS_ECMWF.py`: Python script that retrieves weather data from the Open-Meteo API programamatically using airflow sintaxis.
-
-  - **Data**: processes it into a standardized format using `WeatherForecastSeries.py` Smart Data Model. 
-
-  - **Raw Data**: The input data are JSON files. The variables we are currently using are:
-    - Temperature 
-    - Precipitation
-    - Wind Speed
-
-  - **API Key**: No API key is required for execution as we are downloading public data from Open-Meteo API.
-
-  - **Run script**: Run hourly to ensure the latest forecasts are always retrieved and processed.
-
-- `ARPEGE.py`: Python script that retrieves weather data from the Open-Meteo API programamatically using airflow sintaxis.
-
-  - **Data**: processes it into a standardized format using `WeatherForecastSeries.py` Smart Data Model. 
-
-  - **Raw Data**: The input data are JSON files. The variables we are currently using are:
-    - Temperature 
-    - Precipitation
-    - Relative Humidity
-    - Solar Radiation
-
-  - **API Key**: No API key is required for execution as we are downloading public data from Open-Meteo API.
-
-  - **Run script**: Run hourly to ensure the latest forecasts are always retrieved and processed.
-
-- `DWD_ICON_EU.py`: Python script that retrieves weather data from the Open-Meteo API programmatically using airflow sintaxis.
-
-  - **Data**: processes it into a standardized format using `WeatherForecastSeries.py` Smart Data Model. 
-
-  - **Raw Data**: The input data are JSON files. The variables we are currently using are:
-    - Temperature 
-    - Precipitation
-
-  - **API Key**: No API key is required for execution as we are downloading public data from Open-Meteo API.
-
-  - **Run script**: Run hourly to ensure the latest forecasts are always retrieved and processed.
-
-- `GEPS_ENS_CNC.py`: Python script that retrieves weather data from the Open-Meteo API programamatically using airflow sintaxis.
-
-  - **Data**: processes it into a standardized format using `WeatherForecastSeries.py` Smart Data Model. 
-
-  - **Raw Data**: The input data are JSON files. The variables we are currently using are:
-    - Temperature 
-    - Precipitation
-    - Wind Speed
-
-  - **API Key**: No API key is required for execution as we are downloading public data from Open-Meteo API.
-
-  - **Run script**: Run hourly to ensure the latest forecasts are always retrieved and processed.
-
-- `GFS_NOAA.py`: Python script that retrieves weather data from the Open-Meteo API programamatically using airflow sintaxis.
-
-  - **Data**: processes it into a standardized format using `WeatherForecastSeries.py` Smart Data Model. 
-
-  - **Raw Data**: The input data are JSON files. The variables we are currently using are:
-    - Temperature 
-    - Precipitation
-    - Wind Speed
-    - Solar Radiation
-
-  - **API Key**: No API key is required for execution as we are downloading public data from Open-Meteo API.
-
-  - **Run script**: Run hourly to ensure the latest forecasts are always retrieved and processed.
-
-
-- `IFS9km_ECMWF.py`: Python script that retrieves weather data from the Open-Meteo API programamatically using airflow sintaxis.
-
-  - **Data**: processes it into a standardized format using `WeatherForecastSeries.py` Smart Data Model. 
-
-  - **Raw Data**: The input data are JSON files. The variables we are currently using are:
-    - Temperature 
-    - Precipitation
-    - Wind Speed
-
-  - **API Key**: No API key is required for execution as we are downloading public data from Open-Meteo API.
-
-  - **Run script**: Run hourly to ensure the latest forecasts are always retrieved and processed.
-
-- `Seas5_ECWMF_copernicus.py`: Python script that retrieves weather data from the Open-Meteo API programamatically using airflow sintaxis.
-
-  - **Data**: processes it into a standardized format using `WeatherForecastSeries.py` Smart Data Model. 
-
-  - **Raw Data**: The input data are JSON files. The variables we are currently using are:
-    - Temperature 
-    - Precipitation
-    - Wind Speed
-    - Solar Radiation
-
-  - **API Key**: No API key is required for execution as we are downloading public data from Open-Meteo API.
-
-  - **Run script**: Run hourly to ensure the latest forecasts are always retrieved and processed.
-
-The last two scrips retrieve data from Copernicus Climate Data Store (CDS) API and Early Warning Data Store (EWDS):
-
-- `EFFIS.py`: Python script that retrieves weather data from the dataset (https://cds.climate.copernicus.eu/datasets/sis-tourism-fire-danger-indicators?tab=overview) and download data programamatically using airflow sintaxis. 
-
-  - **Data**: processes it into a standardized format using `WeatherForecastSeries.py` Smart Data Model. 
-
-  - **Raw Data**: The input data are NetCDF (.nc) files containing various weather variables:
-    - Daily fire weather index
-
-  - **API Key**: An API key is required for execution. To get an API key, you need to register on the Copernicus Climate Data Store website: https://cds.climate.copernicus.eu
-
-  - **Run script**: Run this script daily because Copernicus updates the data once a day. It has been configured to automatically detect the latest available forecast.
-
-- `EFAS.py`: Python script that retrieves weather data from the EWDS dataset (https://ewds.climate.copernicus.eu/datasets/efas-forecast?tab=overview) and download data programamatically using airflow sintaxis.
-
-  - **Data**: processes it into a standardized format using `WeatherForecastSeries.py` Smart Data Model. 
-
-  - **Raw Data**: The input data are NetCDF (.nc) files containing the following weather variable:
-    - River discharge last 6 hours
-
-  - **API Key**: An API key is required for execution. To get an API key, you need to register on the Copernicus Climate Data Store website: https://cds.climate.copernicus.eu
-
-  - **Run script**: Run this script daily because Copernicus updates the data once a day. It has been configured to automatically detect the latest available forecast.
 
 <!--
 ### Prerequisites
