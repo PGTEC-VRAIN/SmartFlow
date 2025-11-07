@@ -15,7 +15,7 @@ router = APIRouter(
 
 # Define la ruta base donde Airflow guarda los archivos
 # (Asegúrate de que esta ruta esté montada en Docker)
-DATA_DIR = "/app/data_files/GFS" 
+DATA_DIR = "/data/GFS" 
 MODELO = "ncep_gfs013"
 
 # ... [Definición de find_latest_json] ...

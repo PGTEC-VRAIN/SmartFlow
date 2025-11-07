@@ -15,7 +15,7 @@ router = APIRouter(
 
 # Define la ruta base donde Airflow guarda los archivos
 # (Asegúrate de que esta ruta esté montada en Docker)
-DATA_DIR = "/app/data_files/GEPS" 
+DATA_DIR = "/data/GEPS" 
 MODELO = "gem_global"
 
 # ... [Definición de find_latest_json] ...

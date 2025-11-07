@@ -11,6 +11,8 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+COPY ./data /data
+
 # Copia todos tus scripts de Python al contenedor
 # Asegúrate de copiar también tus archivos NetCDF (.nc) si son pequeños, 
 # o montar un volumen si son muy grandes.
