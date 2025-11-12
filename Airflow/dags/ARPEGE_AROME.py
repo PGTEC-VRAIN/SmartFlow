@@ -20,7 +20,7 @@ import json
 
 DATA_DIR = Path("/opt/airflow/data/ARPEGE/")
 DATA_DIR.mkdir(exist_ok=True)
-MODELO = "meteofrance_arpege_europe" #"gfs_global" #"meteofrance_arpege_europe" #"ecmwf_ifs"
+MODELO = "arome_france_hd" #"gfs_global" #"meteofrance_arpege_europe" #"ecmwf_ifs"
 VARIABLES = ["temperature_2m","precipitation","relative_humidity_2m","shortwave_radiation"]
 
 # --- CONFIGURACIÓN BÁSICA DEL DAG ---

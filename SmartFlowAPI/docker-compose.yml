@@ -1,6 +1,4 @@
 # docker-compose.yml
-version: '3.8'
-
 services:
   smartflow-api:
     # Construye la imagen usando el Dockerfile en el directorio actual
@@ -17,3 +15,10 @@ services:
     # Nota: Si usas volúmenes, ajusta el path de xr.open_dataset() a /app/data_files/archivo.nc
     environment:
       - DATA_DIR=/app/data_files
+    networks:
+      - open_meteo_net
+
+networks:
+  open_meteo_net:
+    external: true
+    name: open-meteo_default

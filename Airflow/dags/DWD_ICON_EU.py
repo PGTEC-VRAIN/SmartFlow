@@ -1,6 +1,8 @@
-# ============================================================
-# 🛰️ Open-Meteo Data Collector from Public API Open-Meteo
-# ============================================================
+'''
+Open-Meteo Data Collector from Public API Open-Meteo
+'''
+
+# Imports
 
 import json
 import requests
@@ -8,7 +10,6 @@ import pandas as pd
 import time
 from pathlib import Path
 import numpy as np
-import subprocess
 from SmartDataModels.WeatherForecastSeries import WeatherForecastSeries
 import geopandas as gpd
 from shapely.geometry import Point
@@ -17,7 +18,9 @@ from airflow import DAG
 from datetime import datetime, timedelta
 import datetime as dt
 import os
-# --- CONFIGURACIÓN BÁSICA DEL DAG ---
+
+# Variables Globales
+
 default_args = {
     'owner': 'AlexPGTEC',
     'depends_on_past': False,
@@ -26,16 +29,30 @@ default_args = {
     'retries': 1,
     'retry_delay': timedelta(minutes=10),
 }
-# Configuración del endpoint y parámetros
-API_URL = "https://api.open-meteo.com/v1/forecast" # URL PUBLICA ||| #"http://openmeteo-api:8080/v1/forecast" # URL interna de Docker
+
+API_URL = "http://openmeteo-api:8080/v1/forecast" #"https://api.open-meteo.com/v1/forecast" # URL PUBLICA ||| #"http://openmeteo-api:8080/v1/forecast" # URL interna de Docker
+DATA_DIR = Path("/opt/airflow/data/DWD_ICON/")
+DATA_DIR.mkdir(exist_ok=True)
+MODELO = "dwd_icon_eu"#"dwd_icon_eu"#"gfs_global" #"meteofrance_arpege_europe" #"ecmwf_ifs"
+VARIABLES = ["temperature_2m","precipitation"]
+ORION_URL = "http://orion-ld:1026/ngsi-ld/v1/entities/"
+
+# -------------------------------------------AIRFLOW-------------------------------------------
 
 def json_serial(obj):
-    """Convierte objetos datetime a string ISO 8601."""
+    """
+    Convierte objetos datetime a string ISO 8601 para poder guardarlo en la clase WeatherForecastSeries.
+    """
     if isinstance(obj, datetime):
         return obj.isoformat()
     raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
 
 def sacar_limite_CV(file_path: str):
+    """
+    Lee un archivo Geojson con las coordenadas de la Comunitat Valencia para filtrar los datos descargados y guardar solamente los datos de la Comunitat Valenciana
+
+    La ruta del archivo Geojson es relativa para que diferentes servicios puedan acceder a ella. En este caso para que la SmartFlowAPI acceda y Airflow también
+    """
     # 1. Cargar el GeoJSON
     gdf = gpd.read_file(file_path)
 
@@ -62,16 +79,12 @@ def sacar_limite_CV(file_path: str):
 
     return lats_in, lons_in
 
-# Carpeta donde guardar los datos (CSV temporal)
-DATA_DIR = Path("/opt/airflow/data/DWD_ICON/")
-DATA_DIR.mkdir(exist_ok=True)
-MODELO = "dwd_icon_eu"#"dwd_icon_eu"#"gfs_global" #"meteofrance_arpege_europe" #"ecmwf_ifs"
-VARIABLES = ["temperature_2m","precipitation"]
-
 def fetch_forecast(lats, lons):
     """
-    Descarga datos de la API interna de Open-Meteo para todas las variables
+    Descarga datos de la API pública de Open-Meteo para todas las variables
     y puntos a la vez. El servidor OpenMeteo gestiona la descarga y el cacheo.
+
+    Se debe realizar un "GET" a la API para cada punto de interés. Para ello, se crean bucles for anidados
     """
     print(f"🔄 Llamando al servicio API en la red interna de Docker: {API_URL} ...")
     start_time = time.time()
@@ -166,16 +179,23 @@ def fetch_forecast(lats, lons):
 
 
 def ejecutar_descarga_dwd():
+    """
+    Función principal que ejecuta diferentes subfunciones para descargar los datos de interés de la Comunitat Valenciana desde OpenMeteo.
+    
+    Se agrupan los datos por cada coordenada distinta para crear listas de WeatherForecastSeries para cada punto. Así, en cada clase WeatherForecastSeries
+    se almacena la predicción de las variables de interés para cada punto. 
+    
+    La idea de crear listas de WeatherForecastSeries [Wfs,Wfs,Wfs...] es que cuando un usuario pida un punto de interés, se accede a dicho punto solamente y 
+    se devuelven las predicciones.
+    """
     lats, lons = sacar_limite_CV("/opt/airflow/data/F162C175_Demarcacion.geojson")
 
     df, download_time = fetch_forecast(lats, lons)
-    #print(df["temperature_2m"].head())
 
     grouped = df.groupby(['latitude', 'longitude'])
         
     forecasts_list = []
         
-    # 2. Iterar sobre cada grupo y crear objetos WeatherForecastSeries
     for (lat, lon), group_df in grouped:
     
         point_forecast = WeatherForecastSeries(
@@ -188,18 +208,14 @@ def ejecutar_descarga_dwd():
             temperature = group_df["temperature_2m"].dropna().to_list()
         )
 
-        # Convertir el objeto Pydantic a un diccionario de Python
         forecasts_list.append(point_forecast.model_dump()) # Usamos model_dump() (o .dict() si es Pydantic v1)
-    # print(point_forecast)
-    # 3. Crear el Diccionario Contenedor Final
-    # Este objeto NO necesita ser una clase Pydantic si solo se usa para guardar en disco
+
     final_data_dict = {
         "id": f"{MODELO}_{download_time}",
         "dateIssued": download_time,
         "forecasts": forecasts_list  # Lista de diccionarios de pronósticos
     }
 
-    # 4. Guardar el archivo (lógica de Airflow)
     os.makedirs(DATA_DIR, exist_ok=True)
     print("💾 Guardando datos en archivo JSON en ", DATA_DIR)
     filename = f"{MODELO}_{download_time.replace(':', '-')}.json"
@@ -221,9 +237,8 @@ with DAG(
     tags=['dwd', 'icon-eu', 'meteorología', 'alemania'],
 ) as dag:
     
-    # 1. Tarea para ejecutar el procesamiento y descarga
     procesar_dwd_icon = PythonOperator(
         task_id='procesar_dwd_icon',
-        python_callable=ejecutar_descarga_dwd, # Llama a la función Python
+        python_callable=ejecutar_descarga_dwd, 
     )
     procesar_dwd_icon

@@ -1,129 +1,128 @@
-from fastapi import APIRouter,Depends, Query,HTTPException
-from typing import Optional,List, Dict, Any
-import pandas as pd
-import glob
-import os
-import json
+from fastapi import APIRouter, Depends, Query, HTTPException
+from typing import List, Dict, Any
+import requests 
 from functools import lru_cache
 from SmartDataModels.WeatherForecastSeries import WeatherForecastSeries
-import math
-# Crea una instancia del Router
+from datetime import datetime, timezone
+
 router = APIRouter(
-    prefix="/GFS_NOAA",  # Todas las rutas aquí comenzarán con /GFS
-    tags=["GFS_NOAA"] # Agrupa las rutas en Swagger UI
+    prefix="/GFS_NOAA_OpenMeteo",
+    tags=["GFS_NOAA_OpenMeteo"]
 )
 
-# Define la ruta base donde Airflow guarda los archivos
-# (Asegúrate de que esta ruta esté montada en Docker)
-DATA_DIR = "/data/GFS" 
+OPEN_METEO_API_URL = "http://open-meteo-api:8080/v1/forecast" 
 MODELO = "ncep_gfs013"
+VARIABLES_OM = "temperature_2m,precipitation" 
 
-# ... [Definición de find_latest_json] ...
-def find_latest_json_path(directory_path: str, filename_pattern: str) -> str:
-    """Encuentra la ruta completa al archivo JSON más reciente."""
-    
-    search_pattern = os.path.join(directory_path, f"{filename_pattern}*.json")
-    list_of_files = glob.glob(search_pattern)
-    
-    if not list_of_files:
-        # Lanza un error HTTP 404 (o 503 si el servicio no está disponible)
-        raise HTTPException(status_code=503, detail=f"Datos del modelo GFS_NOAA no disponibles. No se encontraron archivos.")
 
-    # Encuentra el archivo más reciente por tiempo de modificación
-    latest_file = max(list_of_files, key=os.path.getmtime)
-    
-    return latest_file
-
-@lru_cache(maxsize=1) # 🔑 ¡Caché crucial! Solo carga los datos una vez
-def get_cached_forecast_data() -> Dict[str, Any]:
+@lru_cache(maxsize=1) # memoria caché que guarda el último get hecho. si el usuario pide otras coords se modifica la caché con las nuevas coords y values
+def get_raw_forecast_from_om(lat: float, lon: float) -> Dict[str, Any]:
     """
-    Dependencia que carga y valida el archivo JSON más reciente.
-    Retorna el diccionario completo, incluyendo los metadatos y la lista de objetos PointForecast validados.
+    Función que consulta el servidor Open-Meteo local para obtener datos en JSON.
+    El resultado es el JSON original devuelto por Open-Meteo.
     """
-    latest_file_path = find_latest_json_path(DATA_DIR, MODELO)
+    params = {
+        "latitude": lat,
+        "longitude": lon,
+        "hourly": VARIABLES_OM,
+        "models": MODELO
+    }
+    
     try:
-        with open(latest_file_path, 'r') as f:
-            full_data = json.load(f)
-            
-        if 'forecasts' not in full_data or not isinstance(full_data['forecasts'], list):
-             raise HTTPException(status_code=500, detail="El archivo JSON no tiene la clave 'forecasts' o no es una lista.")
-
-        # Validar CADA elemento de la lista 'forecasts' usando el modelo WeatherForecastSeries
-        validated_forecasts = []
-        for raw_point in full_data['forecasts']:
-            # Pydantic valida y convierte el diccionario en un objeto WeatherForecastSeries
-            validated_forecasts.append(WeatherForecastSeries(**raw_point))
-            
-        # Reemplazar la lista cruda del diccionario por los objetos validados
-        full_data['forecasts'] = validated_forecasts
+        response = requests.get(OPEN_METEO_API_URL, params=params, timeout=10)
+        response.raise_for_status() 
+        raw_data = response.json()
+        return raw_data
         
-        return full_data
+    except requests.exceptions.RequestException as e:
+        raise HTTPException(
+            status_code=503,
+            detail=f"Error al conectar o consultar el servidor Open-Meteo local: {e}"
+        )
+
+
+def om_to_smartdatamodel(om_data: Dict[str, Any], model_name: str) -> List[Any]:
+    """
+    Transforma el JSON de Open-Meteo (OM) en el smart data model WeatherForecastSeries 
+    que contiene las listas de datos, filtrando los valores nulos.
+    """
     
-    except json.JSONDecodeError:
-        raise HTTPException(status_code=500, detail="Error al decodificar el archivo JSON. Estructura inválida.")
+    hourly_data = om_data.get('hourly', {})
+    if not hourly_data:
+        return [] 
+        
+    raw_times = hourly_data.get('time', [])
+    raw_temp_series = hourly_data.get('temperature_2m', [])
+    raw_prec_series = hourly_data.get('precipitation', [])
+    
+    filtered_times = []
+    filtered_temps = []
+    filtered_precs = []
+    
+    for i in range(len(raw_times)):
+        current_temp = raw_temp_series[i]
+        current_prec = raw_prec_series[i]
+        
+        
+        if current_temp is not None and current_prec is not None: # Eliminamos valores nulos
+            filtered_times.append(raw_times[i])
+            
+            
+            filtered_temps.append(current_temp) 
+            filtered_precs.append(current_prec)
+
+
+    date_issued = datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')
+    
+    lat_model = om_data.get('latitude', 0.0)
+    lon_model = om_data.get('longitude', 0.0)
+    
+    if not filtered_times:
+        return []
+
+    try:
+        forecast_entity = WeatherForecastSeries(
+            id=f"urn:ngsi-ld:WeatherForecastSeries:{model_name}:{lat_model},{lon_model}",
+            type="WeatherForecastSeries",
+            dateObserved=filtered_times[0], 
+            dateIssued=date_issued,
+            lat=lat_model,
+            lon=lon_model,
+            timestamp=filtered_times, 
+            temperature=filtered_temps,
+            precipitation=filtered_precs, 
+            
+        )
+        
+        return [forecast_entity]
+    
     except Exception as e:
-        # Esto captura errores de validación de Pydantic
-        raise HTTPException(status_code=500, detail=f"Error al cargar/validar los datos: {e}")
+        # Si falla aquí, es por un error de tipo Pydantic no resuelto (ej. 'timestamp' vs 'time')
+        raise RuntimeError(f"Fallo al mapear a WeatherForecastSeries. Revise los tipos: {e}")
 
 @router.get(
     "/data/coordinates",
-    response_model=List[WeatherForecastSeries], # La respuesta es una lista de pronósticos
-    summary="Obtiene el pronóstico más reciente, filtrado por coordenadas."
+    response_model=List[WeatherForecastSeries],
+    summary="Obtiene el pronóstico más reciente, filtrado por coordenadas (usando OM local)."
 )
-async def get_GFS_NOAA_data(
-    # Usamos la dependencia para obtener los datos
-    data: Dict[str, Any] = Depends(get_cached_forecast_data),
-    # Parámetros de consulta
-    lat: float = Query(..., description="Latitud del punto a consultar. Se interpola si la coordenada no está disponible"),
-    lon: float = Query(..., description="Longitud del punto a consultar.Se interpola si la coordenada no está disponible"),
+async def get_gfs_data(
+    lat: float = Query(..., description="Latitud del punto a consultar."),
+    lon: float = Query(..., description="Longitud del punto a consultar."),
 ):
     
-    # Extraemos la lista de objetos WeatherForecastSeries validados
-    collection_forecasts: List[WeatherForecastSeries] = data["forecasts"]
-
-    # 1. Búsqueda por Coincidencia Exacta
-    # Usamos una tolerancia mínima para errores de coma flotante
-    TOLERANCE = 0.0001 
+    # 1. Obtener los datos del servidor OM local (con caché)
+    raw_om_data = get_raw_forecast_from_om(lat, lon) 
     
-    filtered_forecasts = [
-        point for point in collection_forecasts 
-        if abs(point.lat - lat) < TOLERANCE and abs(point.lon - lon) < TOLERANCE
-    ]
+    # 2. Transformar el JSON de OM al formato Smart Data Model
+    collection_forecasts = om_to_smartdatamodel(raw_om_data,MODELO)
     
-    if filtered_forecasts:
-        # Se encontró el punto exacto o uno muy cercano
-        return filtered_forecasts
-    
-    # --- 2. Lógica del Vecino Más Cercano (Nearest Neighbor) ---
-
-    # Si no hay coincidencia exacta, buscamos el punto más cercano
-    
-    # Inicialización con una distancia imposiblemente grande
-    min_distance_sq = float('inf')
-    closest_point = None
-
-    for point in collection_forecasts:
-        # Calculamos la distancia euclidiana al cuadrado para evitar la costosa raíz cuadrada
-        # Distancia = (lat_modelo - lat_consulta)^2 + (lon_modelo - lon_consulta)^2
-        distance_sq = (point.lat - lat)**2 + (point.lon - lon)**2
+    if not collection_forecasts:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No hay datos de pronóstico disponibles para el modelo {MODELO} en esa ubicación."
+        )
         
-        if distance_sq < min_distance_sq:
-            min_distance_sq = distance_sq
-            closest_point = point
-
-    if closest_point:
-        # Si encontramos el punto más cercano, lo devolvemos
-        
-        # Opcional: Puedes calcular la distancia real (en grados) para el mensaje
-        min_distance = math.sqrt(min_distance_sq)
-        
-        print(f"Punto exacto no encontrado. Devolviendo el más cercano en lat={closest_point.lat}, lon={closest_point.lon}. Distancia: {min_distance:.4f} grados.")
-        
-        # Devolvemos el punto más cercano en una lista (para mantener la consistencia del endpoint)
-        return [closest_point]
+    # --- 3. Lógica de Respuesta ---
+    # El servidor devuelve los datos para el punto de consulta (interpolado o el más cercano), ya no hace falta crear el algoritmo de k-neighbors
     
-    # Si la colección de pronósticos está vacía (nunca debería pasar si get_cached_forecast_data funciona)
-    raise HTTPException(
-        status_code=404,
-        detail=f"No hay datos de pronóstico disponibles para el modelo ."
-    )
+    return collection_forecasts

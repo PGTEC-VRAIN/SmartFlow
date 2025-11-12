@@ -32,7 +32,7 @@
 <br />
 <div align="center">
   <a href="https://airflow.apache.org/">
-    <img src="Airflow/images/airflow.jpeg" alt="Airflow Logo" width="80"/>
+    <img src="Airflow/images/airflow.png" alt="Airflow Logo" width="80"/>
   </a>
 
   <h3 align="center">Airflow</h3>
@@ -291,49 +291,49 @@ These are the necessary requirements to be able to execute the project:
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-En este apartado se describe la forma de desplegar y usar el servicio Airflow mediante un ejemplo guiado.
+This section describes how to deploy and use the Airflow service through a guided example.
 
-Para desplegar el servicio:
+To deploy the service:
 
-El primer paso para desplegar el entorno es tener el repositorio de Github clonado en el ordenador. Para ello se pueden seguir las instrucciones siguientes en una terminal Ubuntu:
+The first step in deploying the environment is to clone the GitHub repository onto your computer. To do this, follow these instructions in an Ubuntu terminal:
 
 1. Clone the repo and navigate to the service folder
-   ```sh
+```sh
    git clone https://github.com/PGTEC-VRAIN/SmartFlow
    cd SmartFlow/Airflow
    ``` 
 
-El segundo paso es levantar el serivicio Docker que previamente se debe tener instalado en el ordenador.
+The second step is to launch the Docker service, which must be installed on your computer beforehand.
 
-2. Initialize docker:
-   ```sh
-   sudo systemctl start docker
-   ```
+2. Initialise Docker:
+```sh
+sudo systemctl start docker
+```
 
-El tercer y último paso es inicializar los contenedores construyendolos primeramente con `--build` y luego levantandolos con `up`. Todo ello se puede realizar en la misma linea. Para evitar los logs de ejecución se usa el parámetro `-d`.
+The third and final step is to initialise the containers by first building them with `--build` and then launching them with `up`. All of this can be done on the same line. To avoid execution logs, use the `-d` parameter.
 
-3. Initialize docker containers
-   ```sh
-   docker compose up --build -d
-   ```
+3. Initialise Docker containers
+```sh
+docker compose up --build -d
+```
 
-Para usar el servicio:
+To use the service:
 
-El primer paso es acceder a la página web local donde está Airflow en ejecución. El servicio está diseñado para correr en localhost en el puerto 8080. Por tanto, se debe acceder a la siguiente URL para entrar en Airflow:
+The first step is to access the local web page where Airflow is running. The service is designed to run on localhost on port 8080. Therefore, you must access the following URL to enter Airflow:
 
-1. Acceso a la URL de Airflow:
-  ```sh
-  http:localhost:8080
-  ```
-En la configuración del servicio Airflow se han establecido las siguientes credenciales para acceder a Airflow:
+1. Access the Airflow URL:
+```sh
+http:localhost:8080
+```
+The following credentials have been set in the Airflow service configuration to access Airflow:
 
-2. Credenciales para inicio de sesión:
-  ```sh
-  user: airflow
-  password:airflow
-  ```
+2. Login credentials:
+```sh
+user: airflow
+password:airflow
+```
 
-Una vez accedido a la web, el próximo paso es acceder a una DAG. Para ello se debe buscar el modelo de interés y acceder a la DAG clickando en ella. La siguiente captura muestra las DAGS disponibles en la web Airflow:
+Once you have accessed the website, the next step is to access a DAG. To do this, search for the model you are interested in and access the DAG by clicking on it. The following screenshot shows the DAGs available on the Airflow website:
 
 <div align="center">
 
@@ -341,7 +341,7 @@ Una vez accedido a la web, el próximo paso es acceder a una DAG. Para ello se d
 
 </div>
 
-Al acceder a la DAG se muestra la siguiente ventana. Para activar la DAG se debe clickar en el botón `Trigger` situado en la esquina superior derecha tal y como muestra la siguiente imagen:
+When accessing the DAG, the following window will appear. To activate the DAG, click on the `Trigger` button located in the upper right corner, as shown in the following image:
 
 <div align="center">
 
@@ -349,18 +349,15 @@ Al acceder a la DAG se muestra la siguiente ventana. Para activar la DAG se debe
 
 </div>
 
-Una vez la DAG se encuentra en ejecución, se accede una nueva ventana que describe en tiempo real el estado de la ejecución de la DAG. En esta ventana se recomienda acceder a la tarea que se está ejecutando clickando sobre ella. A continuación, la siguiente ventana es mucho más completa. En ella se muestra el tiempo de ejecución, el progreso de la misma, el código que se está ejecutando y los logs. Para comprobar que la DAG se ha ejecutado correctamente se pueden acceder a los logs y revisar que se han descargado los datos del modelo correctamente. A continuación, se muestra una captura de los logs del modelo DWD_ICON:
+Once the DAG is running, a new window opens showing the status of the DAG execution in real time. In this window, we recommend accessing the task that is being executed by clicking on it. The next window is much more comprehensive. It shows the execution time, the progress of the execution, the code being executed and the logs. To verify that the DAG has been executed correctly, you can access the logs and check that the model data has been downloaded correctly. Below is a screenshot of the DWD_ICON model logs:
 
-<div align="center">
+<div align="centre">
 
 <img src="images/dag_exec.png" alt="Airflow dags" width="700"/>
 
 </div>
 
-En la captura se puede observar que el script se ha ejecutado sin problema y se han guardado las predicciones del modelo ICON_EU en formato JSON siguiendo el Smart Data Model WeatherForecastSeries. El siguiente paso a implementar es guardar los datos JSON en Orion-LD
-
-EXPLICACIÓN DE  GUARDAR LOS DATOS EN ORION-LD
-To fill...
+The screenshot shows that the script has run without any problems and that the predictions from the ICON_EU model have been saved in JSON format following the WeatherForecastSeries Smart Data Model.
 
 <!-- ROADMAP 
 ## Roadmap

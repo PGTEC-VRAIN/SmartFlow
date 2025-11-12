@@ -108,6 +108,8 @@ services:
       retries: 5
       start_period: 5s
     restart: always
+    networks:
+      - airflow_default
 
   redis:
     # Redis is limited to 7.2-bookworm due to licencing change
@@ -122,7 +124,8 @@ services:
       retries: 50
       start_period: 30s
     restart: always
-
+    networks:
+      - airflow_default
   airflow-apiserver:
     <<: *airflow-common
     command: api-server
@@ -139,6 +142,8 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    networks:
+      - airflow_default
 
   airflow-scheduler:
     <<: *airflow-common
@@ -154,6 +159,8 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    networks:
+      - airflow_default
 
   airflow-dag-processor:
     <<: *airflow-common
@@ -169,6 +176,8 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    networks:
+      - airflow_default
 
   airflow-worker:
     <<: *airflow-common
@@ -194,6 +203,8 @@ services:
         condition: service_healthy
       airflow-init:
         condition: service_completed_successfully
+    networks:
+      - airflow_default
 
   airflow-triggerer:
     <<: *airflow-common
@@ -209,6 +220,8 @@ services:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    networks:
+      - airflow_default
 
   airflow-init:
     <<: *airflow-common
@@ -339,32 +352,8 @@ services:
       airflow-init:
         condition: service_completed_successfully
 
-  # openmeteo-sync: # Nuevo servicio para descargar datos
-  #     image: ghcr.io/open-meteo/open-meteo:latest
-  #     container_name: openmeteo_sync
-  #     # El comando de sincronización que necesitas
-  #     # Necesitas saber el nombre exacto del modelo ICON_EU en la API
-  #     # Probaremos con 'dwd_icon_eu' o 'icon_eu' y las variables que necesitas.
-  #     command: sync dwd_icon_eu temperature_2m precipitation wind_speed_10m
-  #     volumes:
-  #       - openmeteo-data:/app/data # Monta el volumen para guardar los datos
-  #     profiles:
-  #       - sync # Para que solo se ejecute cuando lo pidas
-  #     # Es importante que el contenedor salga exitosamente una vez que sincronice
-
-  # openmeteo-api:
-  #   image: ghcr.io/open-meteo/open-meteo:latest
-  #   container_name: openmeteo_api
-  #   restart: always
-  #   ports:
-  #     - "8080:8080"
-  #   volumes:
-  #     - openmeteo-data:/app/data # Monta el data volume para leer los datos
-  #   # Aseguramos que la API no inicie hasta que los datos sean sincronizados
-  #   depends_on:
-  #     openmeteo-sync:
-  #       condition: service_completed_successfully # Importante!
-
 volumes:
   postgres-db-volume:
-  #openmeteo-data:
+
+networks:
+  airflow_default:

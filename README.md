@@ -31,16 +31,16 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://airflow.apache.org/">
-    <img src="Airflow/images/airflow.jpeg" alt="Airflow Logo" width="80"/>
+  <a href="https://pgtec.webs.upv.es/">
+    <img src="https://pgtec.webs.upv.es/images/logo_PGTEC.svg" alt="PGTEC Logo" width="80"/>
   </a>
 
-  <h3 align="center">Airflow</h3>
+  <h3 align="center">Smart data pipelines</h3>
 
   <p align="center">
-    Repository containing Python scripts to ingest data from multiple climate models, transform it into FIWARE Smart Data Model WeatherForecastSeries, and build Airflow DAGs to orchestrate automated data pipelines.
+    Repository containing different services such as Airflow, OrionLD and SmartFlowAPI to ingest data from multiple sources, transform it into FIWARE Smart Data Models, build Airflow DAGs to orchestrate automated data pipelines and publish de data via API to be accessible by TETIS model.
     <br />
-    <a href="https://pgtec-vrain.github.io/welcome/"><strong>See the PGTEC web page »</strong></a>
+    <a href="https://pgtec.webs.upv.es/"><strong>See the web page »</strong></a>
     <br />
     <!--<br />
     <a href="https://github.com/othneildrew/Best-README-Template">View Demo</a>

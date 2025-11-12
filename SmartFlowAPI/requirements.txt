@@ -5,3 +5,4 @@ netCDF4
 pandas
 routers
 pydantic
+requests
