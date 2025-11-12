@@ -1,0 +1,146 @@
+x-shared_environment: &shared_environment
+  LOG_LEVEL: ${LOG_LEVEL:-info}
+
+services:
+  open-meteo-api:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: open-meteo-api
+    ports:
+      - "80:8080"
+    command: serve
+    volumes:
+      - ./data:/app/data
+    restart: always
+    environment:
+      <<: *shared_environment
+  seas5_temp:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: seas5_temp
+    command: sync ecmwf_seas5_12hourly temperature_2m --past-days 0 --repeat-interval 60 --concurrent 1
+    volumes:
+      - ./data:/app/data
+    restart: always
+    environment:
+      <<: *shared_environment
+  seas5_prec:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: seas5_prec
+    command: sync ecmwf_seas5_12hourly precipitation --past-days 0 --repeat-interval 60 --concurrent 1
+    volumes:
+      - ./data:/app/data
+    restart: always
+    environment:
+      <<: *shared_environment
+  icon_temp:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: icon_temp
+    command: sync dwd_icon_eu temperature_2m --past-days 0 --repeat-interval 60 --concurrent 1
+    volumes:
+      - ./data:/app/data
+    restart: always
+    environment:
+      <<: *shared_environment
+  icon_prec:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: icon_prec
+    command: sync dwd_icon_eu precipitation --past-days 0 --repeat-interval 60 --concurrent 1
+    volumes:
+      - ./data:/app/data
+    restart: always
+    environment:
+      <<: *shared_environment
+
+  arpege_arome_temp:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: arpege_arome_temp
+    command: sync meteofrance_arome_france_hd temperature_2m --past-days 0 --repeat-interval 60 --concurrent 1
+    volumes:
+      - ./data:/app/data
+    restart: always
+    environment:
+      <<: *shared_environment
+  arpege_arome_prec:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: arpege_arome_prec
+    command: sync meteofrance_arome_france_hd precipitation --past-days 0 --repeat-interval 60 --concurrent 1
+    volumes:
+      - ./data:/app/data
+    restart: always
+    environment:
+      <<: *shared_environment
+
+  geps_temp:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: geps_temp
+    command: sync cmc_gem_gdps temperature_2m --past-days 0 --repeat-interval 60 --concurrent 1
+    volumes:
+      - ./data:/app/data
+    restart: always
+    environment:
+      <<: *shared_environment
+  geps_prec:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: geps_prec
+    command: sync cmc_gem_gdps precipitation --past-days 0 --repeat-interval 60 --concurrent 1
+    volumes:
+      - ./data:/app/data
+    restart: always
+    environment:
+      <<: *shared_environment
+
+  gfs_temp:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: gfs_temp
+    command: sync ncep_gfs013 temperature_2m --past-days 0 --repeat-interval 60 --concurrent 1
+    volumes:
+      - ./data:/app/data
+    restart: always
+    environment:
+      <<: *shared_environment
+  gfs_prec:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: gfs_prec
+    command: sync ncep_gfs013 precipitation --past-days 0 --repeat-interval 60 --concurrent 1
+    volumes:
+      - ./data:/app/data
+    restart: always
+    environment:
+      <<: *shared_environment
+
+  ifs_temp:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: ifs_temp
+    command: sync ecmwf_ifs temperature_2m --past-days 0 --repeat-interval 60 --concurrent 1
+    volumes:
+      - ./data:/app/data
+    restart: always
+    environment:
+      <<: *shared_environment
+  ifs_prec:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: ifs_prec
+    command: sync ecmwf_ifs precipitation --past-days 0 --repeat-interval 60 --concurrent 1
+    volumes:
+      - ./data:/app/data
+    restart: always
+    environment:
+      <<: *shared_environment
+
+  aifs_temp:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: aifs_temp
+    command: sync ecmwf_aifs025_ensemble temperature_2m --past-days 0 --repeat-interval 60 --concurrent 1
+    volumes:
+      - ./data:/app/data
+    restart: always
+    environment:
+      <<: *shared_environment
+  aifs_prec:
+    image: ghcr.io/open-meteo/open-meteo
+    container_name: aifs_prec
+    command: sync ecmwf_aifs025_ensemble precipitation --past-days 0 --repeat-interval 60 --concurrent 1
+    volumes:
+      - ./data:/app/data
+    restart: always
+    environment:
+      <<: *shared_environment
