@@ -11,7 +11,7 @@ router = APIRouter(
 )
 
 OPEN_METEO_API_URL = "http://open-meteo-api:8080/v1/forecast" 
-MODELO_ARPEGE = "dwd_icon_eu"
+MODELO = "dwd_icon_eu"
 VARIABLES_OM = "temperature_2m,precipitation" 
 
 
@@ -25,7 +25,7 @@ def get_raw_forecast_from_om(lat: float, lon: float) -> Dict[str, Any]:
         "latitude": lat,
         "longitude": lon,
         "hourly": VARIABLES_OM,
-        "models": MODELO_ARPEGE
+        "models": MODELO
     }
     
     try:
@@ -113,12 +113,12 @@ async def get_icon_data(
     raw_om_data = get_raw_forecast_from_om(lat, lon) 
     
     # 2. Transformar el JSON de OM al formato Smart Data Model
-    collection_forecasts = json_to_smartdatamodel(raw_om_data,MODELO_ARPEGE)
+    collection_forecasts = json_to_smartdatamodel(raw_om_data,MODELO)
     
     if not collection_forecasts:
         raise HTTPException(
             status_code=404,
-            detail=f"No hay datos de pronóstico disponibles para el modelo {MODELO_ARPEGE} en esa ubicación."
+            detail=f"No hay datos de pronóstico disponibles para el modelo {MODELO} en esa ubicación."
         )
         
     # --- 3. Lógica de Respuesta ---
@@ -136,7 +136,7 @@ def get_grid_forecast_from_om_file(lat1: float, lon1: float,lat2:float,lon2:floa
     """
     params = {
         "hourly": VARIABLES_OM,
-        "models": MODELO_ARPEGE,
+        "models": MODELO,
         "bounding_box": f"{lat1},{lon1},{lat2},{lon2}"
     }
     
@@ -237,12 +237,12 @@ async def get_gridded_icon_data(
     raw_om_data = get_grid_forecast_from_om_file(lat1, lon1,lat2,lon2) 
     
     # 2. Transformar el JSON de OM al formato Smart Data Model
-    collection_forecasts = list_of_jsons_to_smartdatamodel(raw_om_data,MODELO_ARPEGE)
+    collection_forecasts = list_of_jsons_to_smartdatamodel(raw_om_data,MODELO)
     
     if not collection_forecasts:
         raise HTTPException(
             status_code=404,
-            detail=f"No hay datos de pronóstico disponibles para el modelo {MODELO_ARPEGE} en esa ubicación."
+            detail=f"No hay datos de pronóstico disponibles para el modelo {MODELO} en esa ubicación."
         )
         
     # --- 3. Lógica de Respuesta ---

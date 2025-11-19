@@ -1,0 +1,45 @@
+# config.yaml
+modelos:
+  AEMET:
+    endpoints:
+      - /api/v1/Harmonie-AROME-AEMET/data/coordinates
+      - /api/v1/Harmonie-AROME-AEMET/data/grid
+  Open-Meteo:
+    endpoints:
+      - /api/v1/DWD_ICON_OpenMeteo/data/coordinates
+      - /api/v1/DWD_ICON_OpenMeteo/data/grid
+  # AIFS_ECMWF:
+  #   endpoints:
+      - /api/v1/AIFS_ECMWF_OpenMeteo/data/coordinates
+      - /api/v1/AIFS_ECMWF_OpenMeteo/data/grid
+  # IFS_ECMWF:
+  #   endpoints:
+      - /api/v1/IFS_ECMWF_OpenMeteo/data/coordinates
+      - /api/v1/IFS_ECMWF_OpenMeteo/data/grid
+  # ARPEGE_Meteofrance:
+  #   endpoints:
+      - /api/v1/ARPEGE_OpenMeteo/data/coordinates
+      - /api/v1/ARPEGE_OpenMeteo/data/grid
+  # SEAS5_ECMWF:
+  #   endpoints:
+      - /api/v1/SEAS5_ECMWF_OpenMeteo/data/coordinates
+      - /api/v1/SEAS5_ECMWF_OpenMeteo/data/grid
+  # GDPS_ENS_CMC:
+  #   endpoints:
+      - /api/v1/GDPS_ENS_CMC_OpenMeteo/data/coordinates
+      - /api/v1/GDPS_ENS_CMC_OpenMeteo/data/grid
+  # GFS_NOAA:
+  #   endpoints:
+      - /api/v1/GFS_NOAA_OpenMeteo/data/coordinates
+      - /api/v1/GFS_NOAA_OpenMeteo/data/grid
+  Copernicus:
+    endpoints:  
+      - /api/v1/EFAS/data/coordinates
+      - /api/v1/EFAS/data/grid
+      - /api/v1/EFFIS/data/coordinates
+      - /api/v1/EFFIS/data/grid
+
+
+
+  
+  
